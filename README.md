@@ -2,7 +2,7 @@
 
 | Student's name | SCIPER |
 | -------------- | ------ |
-| Levin Hertrich| |
+| Levin Hertrich| 387376|
 | Yassine Turki| 344704|
 | Kirill Zeml| |
 
