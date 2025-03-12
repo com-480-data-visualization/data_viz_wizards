@@ -19,9 +19,27 @@ Please, fill the following sections about your project.
 
 ### Dataset
 
-> Find a dataset (or multiple) that you will explore. Assess the quality of the data it contains and how much preprocessing / data-cleaning it will require before tackling visualization. We recommend using a standard dataset as this course is not about scraping nor data processing.
->
-> Hint: some good pointers for finding quality publicly available datasets ([Google dataset search](https://datasetsearch.research.google.com/), [Kaggle](https://www.kaggle.com/datasets), [OpenSwissData](https://opendata.swiss/en/), [SNAP](https://snap.stanford.edu/data/) and [FiveThirtyEight](https://data.fivethirtyeight.com/)), you could use also the DataSets proposed by the ENAC (see the Announcements section on Zulip).
+In this project, we analyze global music trends using the Spotify
+HUGE database from Kaggle 1. This dataset contains all the songs in
+Spotify’s Daily Top 200 charts in 35+1 (global) countries around the
+world in the years from 2017-2020 (link: https://www.kaggle.com/datasets/pepepython/spotify-huge-database-daily-charts-over-3-years). We focus on the Final Database.csv
+file, which contains 151 attributes and 170,633 rows, refining it
+through Exploratory Data Analysis (EDA).
+The dataset has 151 columns, which is too much for a meaningful
+analysis and visualization. Additionally we have to ensure that all
+columns have the expected datatype and that not too many values
+are missing, especially in the most important columns. Therefore we
+perform the following steps:
+• Dropping columns: Identifying and removing columns that
+are not relevant for the analysis and visualization, especially
+the one-hot encoding of categorial variables
+• Date conversion: Converting the release date attribute to
+datetime
+• Check for missing values: Checking for columns with miss-
+ing values and the percentage of missing values in these columns.
+Fortunately, in each column there are not more than 50% miss-
+ing values and the most important columns don’t have any miss-
+ing values
 
 ### Problematic
 
