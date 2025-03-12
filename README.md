@@ -26,11 +26,11 @@ Music plays an important role in most peoples lives. It motivates, helps in diff
 across countries
 - Artist Comparison: Analyze artists by genre, popularity, and
 followers
-- Musical Composition: Examine song attributes like instru-
-mentalness, speechiness, and liveliness
-- Artist Evolution: Track changes in musical style over time.
+- Musical Composition: Examine song attributes like instrumentalness, speechiness, and liveliness
+- Artist Evolution: Track changes in musical style over time
 - Popularity Trends: Visualize the evolution of music genres
 using time series analysis
+- Actuality: Discover how long songs can stay in the charts after their release
 
 ### Exploratory Data Analysis
 
