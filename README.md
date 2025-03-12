@@ -13,7 +13,7 @@
 
 ### Dataset
 
-In this project, we analyze global music trends using the [Spotify HUGE database](https://www.kaggle.com/datasets/pepepython/spotify-huge-database-daily-charts-over-3-years) from Kaggle. This dataset contains all the songs in Spotify’s Daily Top 200 charts in 35+1 (global) countries around the world in the years from 2017-2020 . We focus on the Final Database.csv file, which contains 151 attributes and 170,633 rows, refining it through Exploratory Data Analysis (EDA). The dataset has 151 columns, which is too much for a meaningful analysis and visualization. Additionally we have to ensure that all columns have the expected datatype and that not too many values are missing, especially in the most important columns. Therefore we perform the following steps:
+In this project, we analyze global music trends using the [Spotify HUGE database](https://www.kaggle.com/datasets/pepepython/spotify-huge-database-daily-charts-over-3-years) from Kaggle. This dataset contains all the songs in Spotify’s Daily Top 200 charts in 35+1 (global) countries around the world in the years from 2017-2020 . We focus on the `Final Database.csv` file, which contains 151 attributes and 170,633 rows, refining it through Exploratory Data Analysis (EDA). The dataset has 151 columns, which is too much for a meaningful analysis and visualization. Additionally we have to ensure that all columns have the expected datatype and that not too many values are missing, especially in the most important columns. Therefore we perform the following steps:
 
 - Dropping columns: Identifying and removing columns that are not relevant for the analysis and visualization, especially the one-hot encoding of categorial variables
 - Date conversion: Converting the release date attribute to datetime
@@ -21,7 +21,7 @@ In this project, we analyze global music trends using the [Spotify HUGE database
 
 ### Problematic
 
-Music plays an important role in most peoples lives. It motivates, helps in difficult times and makes the best moments even more beautiful. The important role of music is reflected in the Spotify charts, they show what songs are most popular at the moment and which artists are on the rise. But why are certain songs and artists more popular than others? Howdoes this differ between countries and which role plays the genre? In this project we want to answer these questions and explore and visualize the data behind the Spotify charts. Therefore we want to explore the following topics:
+Music plays an important role in most peoples lives. It motivates, helps in difficult times and makes the best moments even more beautiful. The important role of music is reflected in the Spotify charts, they show what songs are most popular at the moment and which artists are on the rise. But why are certain songs and artists more popular than others? How does this differ between countries and which role does genre play? In this project we want to answer these questions and explore and visualize the data behind the Spotify charts. Therefore we want to explore the following topics:
 - Geographical Trends: Identify popular songs and genres
 across countries
 - Artist Comparison: Analyze artists by genre, popularity, and
