@@ -34,9 +34,35 @@ using time series analysis
 
 ### Exploratory Data Analysis
 
-> Pre-processing of the data set you chose
-> - Show some basic statistics and get insights about the data
+Because the orignial dataset contains *150* columns which is too much for our visualization we first focused on dropping columns. We found a lot of the columns were one-hot encoded features which are not necessary for visualization so we dropped these columns which resulted in *79* columns. 
 
+After converting the `Release_date` attribute to datetime we focused on missing values. We found that there are basically two sorts of columns: One where less than 1% of values are missing and one where around 58% of values are missing, where all these columns have the missing values in the same rows. To minimize our data loss we decided to create two datasets:
+- No null Dataset: This dataset contains all columns where (nearly) no values are missing so that only a few rows have to be dropped. Whenever possible we will use this dataset for visualizations to minimize dataloss and make our analyses and visualizations as accurate as possible
+- Null Dataset: This dataset contains all columns and rows with missing values are dropped, resulting in a dataloss of roughly 60% of our original data. Despite this dataloss the dataset still contains around *70.000* rows which should be sufficient for meaningful analyses and visualizations. We will use this dataset whenever we need values from columns with missing values
+
+
+For both datasets we calculated the following basic statistics:
+| Attribute | No null Dataset | Null Dataset |
+| -------------- | ------ | ---- |
+| Number of rows | 167,356 | 69,875 |
+| Number of columns | 33 | 79 |
+| Number of unique countries | 35 | 35 |
+| Number of unique artists | 25,063 | 5,332 |
+| Number of unique albums | 33,803 | 5,921 |
+| Number of unique genres | 1,099 | 527 |
+| Average artist followers | 8,544,889 | 12,653,714 |
+| Average popularity | 5,476 | 5,725 |
+| Average duration (ms) | 206,392 | 207,135 |
+| Proportion of explicit songs | 36.8% | 39.5% |
+| Average days since release | 1,338 | 1,459 |
+
+
+Additionally we plotted the distribution of the release year of the songs in both datasets after the year 2000 as most of the songs are released after this date:
+
+![distribution plot](output.png)
+
+
+We can see that in both datasets the distribution of the release year is similar and very dense around the years 2017-2020. This is expected as we are looking at the Spotify Charts during this time period and gives a first hint, that songs are probably in the charts soon after they have been released.
 ### Related work
 This dataset has previously been explored by several users on the Kaggle platform. However, these analyses primarily focus on basic EDA and present static visualizations. There are some projects on similar music-related data such as [1](https://public.tableau.com/app/profile/anne.bode/viz/SpotifyPREMIUMDashboard/PremiumDashboard), [2](https://medium.com/@shrunalisalian97/spotify-data-visualization-4c878c8114e), and [3](https://www.brandonlu.com/spotify-data-project). These projects serve as a basic inspiration for our ideas, yet they generally remain static or limited in interactive elements. 
 
