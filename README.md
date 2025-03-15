@@ -63,6 +63,10 @@ Additionally we plotted the distribution of the release year of the songs in bot
 
 
 We can see that in both datasets the distribution of the release year is similar and very dense around the years 2017-2020. This is expected as we are looking at the Spotify Charts during this time period and gives a first hint, that songs are probably in the charts soon after they have been released.
+
+We also plot the top 10 artists, songs, and genres in terms of popularity. We extend our EDA by analyzing the corelation of our features. More detail is found in the notebook `eda.ipynb`.
+
+
 ### Related work
 This dataset has previously been explored by several users on the Kaggle platform. However, these analyses primarily focus on basic EDA and present static visualizations. There are some projects on similar music-related data such as [1](https://public.tableau.com/app/profile/anne.bode/viz/SpotifyPREMIUMDashboard/PremiumDashboard), [2](https://medium.com/@shrunalisalian97/spotify-data-visualization-4c878c8114e), and [3](https://www.brandonlu.com/spotify-data-project). These projects serve as a basic inspiration for our ideas, yet they generally remain static or limited in interactive elements. 
 
