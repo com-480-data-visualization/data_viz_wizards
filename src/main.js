@@ -80,7 +80,7 @@ class MapPlot {
 			.range(["hsl(62,100%,90%)", "hsl(228,30%,20%)"])
 			.interpolate(d3.interpolateHcl);
 
-            const population_promise = d3.csv("https://drive.google.com/uc?export=download&id=1jXQIRDO9WhdX_zU8jzQrciiBe-XEYni1")
+            const population_promise = d3.csv("https://drive.google.com/uc?export=download&id=1M3xYkJVc9EMFyQNWp-Ef0BsfUKSA-zZh")
             .then((data) => {
               let country_to_popularity = {};
               data.forEach((row) => {
@@ -98,20 +98,9 @@ class MapPlot {
             return countries;
         });
 
-		const point_promise = d3.csv("data/locations.csv").then((data) => {
-			let new_data = [];
-
-			for(let idx = 0; idx < data.length; idx += 10) {
-				new_data.push(data[idx]);
-			}
-
-			return new_data;
-		});
-
-		Promise.all([population_promise, map_promise, point_promise]).then((results) => {
+		Promise.all([population_promise, map_promise]).then((results) => {
             let country_to_popularity = results[0];
-            let map_data = results[1]; // now this is the array of country features
-            let point_data = results[2];
+            let map_data = results[1];
         
             // Use country name or ID depending on your dataset
             map_data.forEach(country => {
@@ -123,7 +112,6 @@ class MapPlot {
             color_scale.domain([d3.min(popularities), d3.max(popularities)]);
         
             this.map_container = this.svg.append('g');
-            this.point_container = this.svg.append('g');
             this.label_container = this.svg.append('g');
         
             this.map_container.selectAll(".country")
@@ -142,20 +130,6 @@ class MapPlot {
 				//.translate((d) => path_generator.centroid(d))
 				.attr("dy", ".35em")
 				.text((d) => d.properties.name);
-
-			const r = 3;
-
-
-			this.point_container.selectAll(".point")
-				.data(point_data)
-				.enter()
-				.append("circle")
-				.classed("point", true)
-				.attr("r", r)
-				.attr("cx", -r)
-				.attr("cy", -r)
-				.attr("transform", (d) => "translate(" + projection([d.lon, d.lat]) + ")")
-				;
 
 			this.makeColorbar(this.svg, color_scale, [50, 30], [20, this.svg_height - 2*30]);
 		});
