@@ -74,7 +74,10 @@ We aim to present various music attributes in an entertaining yet insightful man
 
 ## Milestone 2 (18th April, 5pm)
 
-**10% of the final grade**
+Deliverables for Milestone 2 are in the `Milestone_2.pdf` on the root level of the repository.
+
+
+Skeleton Website: https://com-480-data-visualization.github.io/data_viz_wizards/
 
 
 ## Milestone 3 (30th May, 5pm)
