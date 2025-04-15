@@ -418,14 +418,18 @@ class MapPlot {
 	}
 }
 
+let plot_object;
+
 function whenDocumentLoaded(action) {
-	if (document.readyState === "loading") {
-		document.addEventListener("DOMContentLoaded", action);
-	} else {
-		action();
-	}
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", action);
+    } else {
+        action();
+    }
 }
 
 whenDocumentLoaded(() => {
-	plot_object = new MapPlot('map-plot');
+    plot_object = new MapPlot('map-plot');
 });
+
+window.plot_object = plot_object;
