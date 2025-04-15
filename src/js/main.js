@@ -1,4 +1,6 @@
 import CountryStatistics from './country_stats.js';
+import ArtistComparison from './artist_comparison.js';
+import Navigation from './navigation.js';
 
 class MapPlot {
 
@@ -85,16 +87,19 @@ class MapPlot {
 		const map_promise = d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json");
 
 		this.createFilterControls();
-		this.createNavigationBar();
 
 		Promise.all([music_data_promise, map_promise]).then(([music_data, world_data]) => {
             this.music_data = music_data;
             this.processData(music_data);
             
+			this.navigation = new Navigation(d3.select("body"), this);
             this.countryStats = new CountryStatistics(d3.select("body"), this.data_by_country);
+            this.artistComparison = new ArtistComparison(d3.select("body"), this.music_data);
             
             const countries = topojson.feature(world_data, world_data.objects.countries).features;
             this.updateVisualization(countries, path_generator, color_scale);
+            
+            this.updateFilterOptions();
         });
 	}
 
@@ -126,6 +131,7 @@ class MapPlot {
 				title: song,
 				artist: artist,
 				genre: genre,
+				happiness: parseFloat(row.Happiness),
 				popularity: parseFloat(row.Popularity),
 				danceability: parseFloat(row.danceability),
 				energy: parseFloat(row.energy),
@@ -144,60 +150,28 @@ class MapPlot {
 		});
 	}
 
-	createNavigationBar() {
-		const navBar = d3.select("body").insert("div", "svg")
-			.attr("id", "navigation-bar")
-			.style("background-color", "#333")
-			.style("overflow", "hidden")
-			.style("margin-bottom", "10px");
-			
-		// Add World Map link (home)
-		navBar.append("a")
-			.attr("href", "#")
-			.style("float", "left")
-			.style("display", "block")
-			.style("color", "white")
-			.style("text-align", "center")
-			.style("padding", "14px 16px")
-			.style("text-decoration", "none")
-			.text("World Map")
-			.on("click", (event) => {
-				event.preventDefault();
-				this.showWorldMap();
-			});
-			
-		// Add Country Statistics link
-		navBar.append("a")
-			.attr("href", "#")
-			.style("float", "left")
-			.style("display", "block")
-			.style("color", "white")
-			.style("text-align", "center")
-			.style("padding", "14px 16px")
-			.style("text-decoration", "none")
-			.text("Country Statistics")
-			.on("click", (event) => {
-				event.preventDefault();
-				this.showCountryStatistics();
-			});
-	}
-
 	showWorldMap() {
-		// Hide country statistics view if it exists
 		d3.select("#country-stats-container").style("display", "none");
+		d3.select("#artist-comparison-container").style("display", "none");
 		
-		// Show the map and filter controls
 		d3.select("#map-plot").style("display", "block");
 		d3.select("#filter-controls").style("display", "block");
 		
-		// Re-apply current filter to refresh the map
 		this.applyFilter();
 	}
 
 	showCountryStatistics() {
         d3.select("#map-plot").style("display", "none");
         d3.select("#filter-controls").style("display", "none");
-        this.countryStats.show();
+        d3.select("#artist-comparison-container").style("display", "none");
+        this.countryStats.showCountryStatistics();
+    }
+    
+    showArtistComparison() {
+        d3.select("#map-plot").style("display", "none");
+        d3.select("#filter-controls").style("display", "none");
+        d3.select("#country-stats-container").style("display", "none");
+        d3.select("#artist-comparison-container").style("display", "block");
     }
 
 	createFilterControls() {
@@ -256,19 +230,21 @@ class MapPlot {
 				break;
 		}
 		
-		options.sort();
-		
-		filterSelect.append("option")
-			.attr("value", "all")
-			.text("All");
+		if (options && options.length > 0) {
+			options.sort();
 			
-		filterSelect.selectAll("option.data-option")
-			.data(options)
-			.enter()
-			.append("option")
-			.attr("class", "data-option")
-			.attr("value", d => d)
-			.text(d => d);
+			filterSelect.append("option")
+				.attr("value", "all")
+				.text("All");
+				
+			filterSelect.selectAll("option.data-option")
+				.data(options)
+				.enter()
+				.append("option")
+				.attr("class", "data-option")
+				.attr("value", d => d)
+				.text(d => d);
+		}
 	}
 
 	applyFilter() {
@@ -330,7 +306,6 @@ class MapPlot {
 		countries.forEach(country => {
 			let countryName = country.properties.name;
 			
-			// Normalize country names to match data
 			if (this.countryNameMapping[countryName]) {
 				countryName = this.countryNameMapping[countryName];
 			}
@@ -357,7 +332,6 @@ class MapPlot {
 			.style("stroke", "#fff")
 			.style("stroke-width", "0.5px")
 			.on("mouseover", (event, d) => {
-				// Show tooltip with country name and popularity
 				const popularity = d.properties.popularity ? d.properties.popularity.toFixed(1) : "No data";
 				d3.select("body").append("div")
 					.attr("class", "tooltip")
@@ -373,6 +347,15 @@ class MapPlot {
 			})
 			.on("mouseout", () => {
 				d3.select(".tooltip").remove();
+			})
+			.on("click", (event, d) => {
+				let countryName = d.properties.name;
+				if (this.countryNameMapping[countryName]) {
+					countryName = this.countryNameMapping[countryName];
+				}
+				if (this.data_by_country[countryName]) {
+					this.countryStats.showCountryStatistics(countryName);
+				}
 			});
 		
 		this.makeColorbar(this.svg, color_scale, [50, 30], [20, this.svg_height - 2*30], d3.scaleLinear);
