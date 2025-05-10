@@ -89,3 +89,70 @@ Skeleton Website: https://com-480-data-visualization.github.io/data_viz_wizards/
 
 - < 24h: 80% of the grade for the milestone
 - < 48h: 70% of the grade for the milestone
+
+# Spotify Data Visualization
+
+This project visualizes Spotify music data across different countries, showing popularity of genres, artists, and songs worldwide.
+
+## Prerequisites
+
+- Node.js (version 14 or higher)
+- npm (comes with Node.js)
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd data_viz_wizards
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+This will install all required packages including:
+- React
+- D3.js
+- TopoJSON
+- Vite (development server)
+
+## Running the Application
+
+1. Start the development server:
+```bash
+npm run dev
+```
+
+2. Open your browser and navigate to:
+```
+http://localhost:5173
+```
+
+## Project Structure
+
+- `src/components/` - React components
+  - `MapPlot.jsx` - World map visualization
+  - `CountryStatistics.jsx` - Country-specific statistics
+  - `ArtistComparison.jsx` - Artist comparison visualization
+  - `Navigation.jsx` - Navigation between views
+- `src/App.jsx` - Main application component
+- `src/main.jsx` - Application entry point
+- `src/index.html` - HTML template
+- `src/App.css` - Main styles
+- `src/index.css` - Global styles
+
+## Features
+
+- Interactive world map showing music popularity
+- Country-specific statistics
+- Artist comparison tool
+- Filter by genre, artist, or song
+- Responsive design
+
+## Data Sources
+
+The application uses data from:
+- Spotify API
+- World Atlas TopoJSON data
