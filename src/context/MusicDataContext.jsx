@@ -20,7 +20,7 @@ export const MusicDataProvider = ({ children }) => {
     const loadData = async () => {
       try {
         console.log('Loading music data...')
-        const data = await d3.csv("https://dl.dropboxusercontent.com/scl/fi/j0yasupjf1nln4jhh40hd/final_database.csv?rlkey=gxa8cqm23y9owq1lcuuzgvub4")
+        const data = await d3.csv("https://dl.dropboxusercontent.com/scl/fi/g5ldnl5g5fai6o5twc587/cleaned_data.csv?rlkey=nlhzlwfwymp7ma7497xw8kqdh&st=xr4zrmns&dl=0")
         console.log('Music data loaded successfully:', {
           totalRecords: data.length,
           sampleRecord: data[0],
