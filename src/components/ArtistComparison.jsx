@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { useMusicData } from '../context/MusicDataContext'
+import SearchableSelect from './SearchableSelect'
 
 const ArtistComparison = () => {
   const svgRef = useRef(null)
@@ -32,16 +33,6 @@ const ArtistComparison = () => {
     // but adapted for React and using the refs
   }
 
-  const handleArtistChange = (artist) => {
-    setSelectedArtists(prev => {
-      if (prev.includes(artist)) {
-        return prev.filter(a => a !== artist)
-      } else {
-        return [...prev, artist]
-      }
-    })
-  }
-
   if (loading) return <div>Loading...</div>
   if (error) return <div>Error loading data: {error.message}</div>
 
@@ -49,18 +40,14 @@ const ArtistComparison = () => {
     <div className="artist-comparison-container">
       <div className="artist-selector">
         <h3>Select Artists to Compare</h3>
-        <div className="artist-list">
-          {artists.map(artist => (
-            <label key={artist} className="artist-checkbox">
-              <input
-                type="checkbox"
-                checked={selectedArtists.includes(artist)}
-                onChange={() => handleArtistChange(artist)}
-              />
-              {artist}
-            </label>
-          ))}
-        </div>
+        <SearchableSelect
+          options={artists}
+          selectedValues={selectedArtists}
+          onChange={setSelectedArtists}
+          placeholder="Search artists..."
+          label="Select artists to compare"
+          multiple={true}
+        />
       </div>
       {selectedArtists.length > 0 && (
         <svg ref={svgRef} width="960" height="500"></svg>
