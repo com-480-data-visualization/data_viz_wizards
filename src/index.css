@@ -1,0 +1,55 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.country-stats-container,
+.artist-comparison-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.country-selector,
+.artist-selector {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  width: 100%;
+  max-width: 960px;
+}
+
+.artist-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.artist-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.artist-checkbox:hover {
+  background-color: #f0f0f0;
+}
+
+.artist-checkbox input[type="checkbox"] {
+  margin: 0;
+} 
