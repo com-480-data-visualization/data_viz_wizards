@@ -135,6 +135,12 @@ const MapPlot = () => {
     updateFilterOptions(filterType, { genres, artists, songs })
   }
 
+  useEffect(() => {
+    if (musicData && musicData.length > 0) {
+      processData(musicData)
+    }
+  }, [musicData])
+
   const updateFilterOptions = (type, { genres, artists, songs }) => {
     switch(type) {
       case 'genre':
@@ -161,6 +167,8 @@ const MapPlot = () => {
 
     // Calculate country popularities
     const countryToPopularity = {}
+    let maxPopularity = 0;
+    let minPopularity = Infinity;
     Object.keys(dataByCountry).forEach(country => {
       let countryData = dataByCountry[country]
       let filteredSongs = countryData.songs
@@ -176,7 +184,11 @@ const MapPlot = () => {
 
       if (filteredSongs.length > 0) {
         const totalPopularity = filteredSongs.reduce((sum, song) => sum + song.popularity, 0)
-        countryToPopularity[country] = totalPopularity / filteredSongs.length
+        const avgPopularity = totalPopularity / filteredSongs.length
+        countryToPopularity[country] = avgPopularity
+
+        if (avgPopularity > maxPopularity) maxPopularity = avgPopularity
+        if (avgPopularity < minPopularity) minPopularity = avgPopularity
       } else {
         countryToPopularity[country] = 0
       }
@@ -198,8 +210,11 @@ const MapPlot = () => {
           ...country,
           properties: {
             ...country.properties,
-            color: getColorForPopularity(popularity),
-            popularity: popularity
+            //color: getColorForPopularity(popularity),
+            popularity: popularity,
+            color: popularity != null
+              ? getColorForPopularity(popularity, minPopularity, maxPopularity)
+              : '#ccc'
           }
         };
       });
