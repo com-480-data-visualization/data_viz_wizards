@@ -8,17 +8,25 @@ import './App.css'
 
 function App() {
   const [currentView, setCurrentView] = useState('map')
+  const [selectedCountry, setSelectedCountry] = useState(null)
 
   return (
     <MusicDataProvider>
-      <div className="app">
-        <h1>Popularity of different Genres, Artists and Songs across the World</h1>
-        <Navigation currentView={currentView} setCurrentView={setCurrentView} />
-        
-        {currentView === 'map' && <MapPlot />}
-        {currentView === 'country-stats' && <CountryStatistics />}
-        {currentView === 'artist-comparison' && <ArtistComparison />}
-      </div>
+      {currentView === 'map' && (
+        <MapPlot
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+          setSelectedCountry={setSelectedCountry}
+        />
+      )}
+      {currentView === 'map' && (
+        <MapPlot
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+          setSelectedCountry={setSelectedCountry}
+        />
+      )}
+      {currentView === 'artist-comparison' && <ArtistComparison />}
     </MusicDataProvider>
   )
 }
