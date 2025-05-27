@@ -2,12 +2,14 @@ const Navigation = ({ currentView, setCurrentView }) => {
   return (
     <nav className="navigation">
       <button
+        style={{ marginRight: '10px' }}
         className={currentView === 'map' ? 'active' : ''}
         onClick={() => setCurrentView('map')}
       >
         World Map
       </button>
       <button
+        style={{ marginRight: '10px' }}
         className={currentView === 'country-stats' ? 'active' : ''}
         onClick={() => setCurrentView('country-stats')}
       >

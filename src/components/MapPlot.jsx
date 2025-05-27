@@ -1,106 +1,77 @@
 import { useEffect, useRef, useState } from 'react'
-import * as d3 from 'd3'
-import * as topojson from 'topojson-client'
 import { useMusicData } from '../context/MusicDataContext'
+import Globe from 'react-globe.gl'
+import Navigation from './Navigation';
+import Select from 'react-select';
 
-const MapPlot = () => {
-  const svgRef = useRef(null)
+const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
   const { musicData, loading, error } = useMusicData()
-  const [worldData, setWorldData] = useState(null)
   const [filterType, setFilterType] = useState('genre')
   const [filterValue, setFilterValue] = useState('all')
   const [filterOptions, setFilterOptions] = useState([])
   const [dataByCountry, setDataByCountry] = useState({})
   const [title, setTitle] = useState('Music Popularity by Country')
+  const [countryData, setCountryData] = useState([])
+  const globeRef = useRef()
 
   const countryNameMapping = {
     "United States of America": "USA",
-    "United States": "USA"
+    "United States": "USA",
+    "United Kingdom": "UK",
+    "Great Britain": "UK",
+    "England": "UK",
+    "Scotland": "UK",
+    "Wales": "UK",
+    "Northern Ireland": "UK",
+    "Czech Republic": "Czechia",
+    "Republic of Korea": "South Korea",
+    "Korea, Republic of": "South Korea",
+    "Korea, South": "South Korea",
+    "Russian Federation": "Russia",
+    "Iran, Islamic Republic of": "Iran",
+    "Syrian Arab Republic": "Syria",
+    "Lao People's Democratic Republic": "Laos",
+    "Democratic People's Republic of Korea": "North Korea",
+    "Korea, North": "North Korea",
+    "Brunei Darussalam": "Brunei",
+    "Congo, Democratic Republic of the": "Democratic Republic of the Congo",
+    "Congo, Republic of the": "Republic of the Congo",
+    "Côte d'Ivoire": "Ivory Coast",
+    "Timor-Leste": "East Timor",
+    "Macedonia, the former Yugoslav Republic of": "North Macedonia",
+    "Moldova, Republic of": "Moldova",
+    "Tanzania, United Republic of": "Tanzania",
+    "Venezuela, Bolivarian Republic of": "Venezuela",
+    "Viet Nam": "Vietnam"
   }
 
   useEffect(() => {
-    const loadMapData = async () => {
-      const mapData = await d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json")
-      setWorldData(mapData)
+    if (musicData && Object.keys(dataByCountry).length > 0) {
+      updateVisualization()
     }
-
-    loadMapData()
-  }, [])
+  }, [musicData, filterType, filterValue, dataByCountry])
 
   useEffect(() => {
     if (musicData) {
-      processData(musicData)
+      updateVisualization()
     }
-  }, [musicData])
+  }, [musicData, filterType, filterValue])
 
   useEffect(() => {
-    if (musicData && worldData) {
-      const svg = d3.select(svgRef.current)
-      const svgWidth = 960
-      const svgHeight = 500
-
-      const projection = d3.geoNaturalEarth1()
-        .scale(170)
-        .translate([svgWidth / 2, svgHeight / 2])
-        .precision(.1)
-
-      const pathGenerator = d3.geoPath().projection(projection)
-
-      const colorScale = d3.scaleLinear()
-        .range(["hsl(62,100%,90%)", "hsl(228,30%,20%)"])
-        .interpolate(d3.interpolateHcl)
-
-      const countries = topojson.feature(worldData, worldData.objects.countries).features
-      updateVisualization(countries, pathGenerator, colorScale)
-    }
-  }, [musicData, worldData, filterType, filterValue])
-
-  const makeColorbar = (svg, colorScale, topLeft, colorbarSize) => {
-    const valueToSvg = d3.scaleLinear()
-      .domain(colorScale.domain())
-      .range([colorbarSize[1], 0])
-
-    const range01ToColor = d3.scaleLinear()
-      .domain([0, 1])
-      .range(colorScale.range())
-      .interpolate(colorScale.interpolate())
-
-    const colorbarAxis = d3.axisLeft(valueToSvg)
-      .tickFormat(d3.format(".0f"))
-
-    const colorbarG = svg.append("g")
-      .attr("id", "colorbar")
-      .attr("transform", `translate(${topLeft[0]}, ${topLeft[1]})`)
-      .call(colorbarAxis)
-
-    const range01 = (steps) => Array.from(Array(steps), (_, i) => i / (steps - 1))
-
-    const svgDefs = svg.append("defs")
-
-    const gradient = svgDefs.append('linearGradient')
-      .attr('id', 'colorbar-gradient')
-      .attr('x1', '0%')
-      .attr('y1', '100%')
-      .attr('x2', '0%')
-      .attr('y2', '0%')
-      .attr('spreadMethod', 'pad')
-
-    gradient.selectAll('stop')
-      .data(range01(10))
-      .enter()
-      .append('stop')
-      .attr('offset', d => `${Math.round(100 * d)}%`)
-      .attr('stop-color', d => range01ToColor(d))
-      .attr('stop-opacity', 1)
-
-    colorbarG.append('rect')
-      .attr('id', 'colorbar-area')
-      .attr('width', colorbarSize[0])
-      .attr('height', colorbarSize[1])
-      .style('fill', 'url(#colorbar-gradient)')
-      .style('stroke', 'black')
-      .style('stroke-width', '1px')
-  }
+    // Load GeoJSON data for the globe
+    fetch('https://raw.githubusercontent.com/vasturiano/react-globe.gl/master/example/datasets/ne_110m_admin_0_countries.geojson')
+      .then(res => res.json())
+      .then(geoJson => {
+        const countries = geoJson.features.map(d => ({
+          ...d,
+          properties: {
+            ...d.properties,
+            color: '#ccc'
+          }
+        }));
+        setCountryData(countries);
+      });
+  }, []);
 
   const processData = (musicData) => {
     console.log('Processing music data...')
@@ -110,18 +81,18 @@ const MapPlot = () => {
     const songs = new Set()
 
     musicData.forEach((row, index) => {
-      if (index % 1000 === 0) {
+      if (index % 10000 === 0) {
         console.log(`Processing row ${index} of ${musicData.length}...`)
       }
       const country = row.Country.trim()
       const genre = row.Genre
       const artist = row.Artist
       const song = row.Title
-      
+
       genres.add(genre)
       artists.add(artist)
       songs.add(song)
-      
+
       if (!newDataByCountry[country]) {
         newDataByCountry[country] = {
           songs: [],
@@ -129,7 +100,7 @@ const MapPlot = () => {
           count: 0
         }
       }
-      
+
       newDataByCountry[country].songs.push({
         title: song,
         artist: artist,
@@ -141,11 +112,11 @@ const MapPlot = () => {
         valence: parseFloat(row.valence),
         tempo: parseFloat(row.tempo)
       })
-      
+
       newDataByCountry[country].popularity += parseFloat(row.Popularity)
       newDataByCountry[country].count++
     })
-    
+
     console.log('Calculating average popularity per country...')
     Object.keys(newDataByCountry).forEach(country => {
       if (newDataByCountry[country].count > 0) {
@@ -161,26 +132,45 @@ const MapPlot = () => {
     })
 
     setDataByCountry(newDataByCountry)
-    setFilterOptions(Array.from(genres))
+
+    // Set filter options based on filter type
+    updateFilterOptions(filterType, { genres, artists, songs })
   }
 
-  const updateVisualization = (countries, pathGenerator, colorScale) => {
+  useEffect(() => {
+    if (musicData && musicData.length > 0) {
+      processData(musicData)
+    }
+  }, [musicData])
+
+  const updateFilterOptions = (type, { genres, artists, songs }) => {
+    switch (type) {
+      case 'genre':
+        setFilterOptions(Array.from(genres))
+        break
+      case 'artist':
+        setFilterOptions(Array.from(artists))
+        break
+      case 'song':
+        setFilterOptions(Array.from(songs))
+        break
+      default:
+        setFilterOptions([])
+    }
+  }
+
+  const updateVisualization = () => {
     console.log('Updating visualization with:', {
-      countriesCount: countries.length,
       dataByCountryKeys: Object.keys(dataByCountry),
       filterType,
       filterValue,
       filterOptions
     })
 
-    const svg = d3.select(svgRef.current)
-    svg.selectAll("*").remove()
-
-    // Create a group for the map
-    const mapGroup = svg.append("g")
-
     // Calculate country popularities
     const countryToPopularity = {}
+    let maxPopularity = 0;
+    let minPopularity = Infinity;
     Object.keys(dataByCountry).forEach(country => {
       let countryData = dataByCountry[country]
       let filteredSongs = countryData.songs
@@ -196,155 +186,304 @@ const MapPlot = () => {
 
       if (filteredSongs.length > 0) {
         const totalPopularity = filteredSongs.reduce((sum, song) => sum + song.popularity, 0)
-        countryToPopularity[country] = totalPopularity / filteredSongs.length
+        const avgPopularity = totalPopularity / filteredSongs.length
+        countryToPopularity[country] = avgPopularity
+
+        if (avgPopularity > maxPopularity) maxPopularity = avgPopularity
+        if (avgPopularity < minPopularity) minPopularity = avgPopularity
       } else {
         countryToPopularity[country] = 0
       }
     })
 
-    // Update country properties
-    countries.forEach(country => {
-      let countryName = country.properties.name
-      if (countryNameMapping[countryName]) {
-        countryName = countryNameMapping[countryName]
-      }
-      country.properties.popularity = countryToPopularity[countryName] || 0
-    })
+    // Update globe colors based on popularity
+    if (countryData.length > 0) {
+      const updatedCountries = countryData.map(country => {
+        const countryName = country.properties.NAME || country.properties.ADMIN;
+        const mappedName = countryNameMapping[countryName] || countryName;
+        const popularity = countryToPopularity[mappedName] || 0;
 
-    // Update color scale domain
-    const popularities = Object.values(countryToPopularity).filter(p => p > 0)
-    if (popularities.length > 0) {
-      colorScale.domain([d3.min(popularities), d3.max(popularities)])
-    } else {
-      colorScale.domain([0, 100])
+        // Add debug logging
+        if (popularity > 0) {
+          console.log(`Country ${mappedName} has popularity ${popularity}`);
+        }
+
+        return {
+          ...country,
+          properties: {
+            ...country.properties,
+            popularity: popularity,
+            color: popularity != null
+              ? getColorForPopularity(popularity, minPopularity, maxPopularity)
+              : '#ccc'
+          }
+        };
+      });
+
+      setCountryData(updatedCountries);
     }
-
-    // Draw countries
-    mapGroup.selectAll("path")
-      .data(countries)
-      .enter()
-      .append("path")
-      .attr("d", pathGenerator)
-      .attr("fill", d => d.properties.popularity ? colorScale(d.properties.popularity) : "#ccc")
-      .attr("stroke", "#fff")
-      .attr("stroke-width", 0.5)
-      .on("mouseover", function(event, d) {
-        const popularity = d.properties.popularity ? d.properties.popularity.toFixed(1) : "No data"
-        d3.select("body").append("div")
-          .attr("class", "tooltip")
-          .style("position", "absolute")
-          .style("background", "white")
-          .style("border", "1px solid black")
-          .style("padding", "5px")
-          .style("border-radius", "5px")
-          .style("pointer-events", "none")
-          .style("left", `${event.pageX + 10}px`)
-          .style("top", `${event.pageY - 28}px`)
-          .html(`<strong>${d.properties.name}</strong><br>Popularity: ${popularity}`)
-
-        d3.select(this)
-          .attr("stroke", "#000")
-          .attr("stroke-width", 2)
-      })
-      .on("mouseout", function() {
-        d3.select(".tooltip").remove()
-        d3.select(this)
-          .attr("stroke", "#fff")
-          .attr("stroke-width", 0.5)
-      })
-      .on("click", (event, d) => {
-        let countryName = d.properties.name
-        if (countryNameMapping[countryName]) {
-          countryName = countryNameMapping[countryName]
-        }
-        if (dataByCountry[countryName]) {
-          // TODO: Implement country statistics view
-          console.log(`Clicked on ${countryName}`)
-        }
-      })
-
-    // Add colorbar
-    makeColorbar(svg, colorScale, [50, 30], [20, 440])
 
     // Update title
     let newTitle = "Music Popularity by Country"
     if (filterValue !== "all") {
-      switch(filterType) {
+      switch (filterType) {
         case "genre":
-          newTitle = `${filterValue} Genre Popularity by Country`
+          newTitle = `Popularity of ${filterValue}`
           break
         case "artist":
-          newTitle = `${filterValue} Popularity by Country`
+          newTitle = `Popularity of ${filterValue}`
           break
         case "song":
-          newTitle = `"${filterValue}" Popularity by Country`
+          newTitle = `Popularity of ${filterValue}`
           break
       }
     } else {
-      switch(filterType) {
-        case "genre":
-          newTitle = "All Genres Popularity by Country"
-          break
-        case "artist":
-          newTitle = "All Artists Popularity by Country"
-          break
-        case "song":
-          newTitle = "All Songs Popularity by Country"
-          break
-      }
+      newTitle = "Overall Average Popularity"
     }
     setTitle(newTitle)
-
-    // Add title
-    svg.append("text")
-      .attr("class", "map-title")
-      .attr("x", 480)
-      .attr("y", 15)
-      .attr("text-anchor", "middle")
-      .style("font-size", "16px")
-      .style("font-weight", "bold")
-      .text(newTitle)
   }
+
+  const getColorForPopularity = (popularity, minPopularity, maxPopularity) => {
+    if (!popularity) return '#ccc';
+
+    const normalizedValue = (popularity - minPopularity) / (maxPopularity - minPopularity);
+
+    // RGB values for green and red
+    const startColor = [255, 0, 0];
+    const endColor = [0, 255, 0];
+
+    const r = Math.round(startColor[0] + normalizedValue * (endColor[0] - startColor[0]));
+    const g = Math.round(startColor[1] + normalizedValue * (endColor[1] - startColor[1]));
+    const b = Math.round(startColor[2] + normalizedValue * (endColor[2] - startColor[2]));
+
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  const handleCountryClick = (country) => {
+    const countryName = country.properties.NAME || country.properties.ADMIN;
+    const mappedName = countryNameMapping[countryName] || countryName;
+
+    if (dataByCountry[mappedName]) {
+      setSelectedCountry(mappedName);
+      setCurrentView('country-stats');
+      console.log(`Navigating to statistics for: ${mappedName}`);
+    }
+  };
+
+  const capitalize = (str) =>
+    str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+
+  const selectStyles = {
+    container: (base) => ({
+      ...base,
+      //width: '100%',
+      //marginBottom: '10px'
+    }),
+    control: (base) => ({
+      ...base,
+      //minHeight: 38,
+      fontSize: '0.9rem'
+    }),
+    menu: (base) => ({
+      ...base,
+      //maxHeight: 180,
+      overflowY: 'auto',
+      //zIndex: 5
+    }),
+    option: (base) => ({
+      ...base,
+      fontSize: '0.9rem',
+      whiteSpace: 'nowrap',
+      //overflow: 'hidden',
+      textOverflow: 'ellipsis'
+    })
+  };
 
   if (loading) return <div>Loading...</div>
   if (error) return <div>Error loading data: {error.message}</div>
 
   return (
-    <div className="map-container">
-      <div className="filter-controls">
-        <h3>Filter Options</h3>
-        <div className="filter-row">
-          <label htmlFor="filter-type">Filter by: </label>
-          <select
-            id="filter-type"
-            value={filterType}
-            onChange={(e) => {
-              setFilterType(e.target.value)
-              setFilterValue('all')
-            }}
-          >
-            <option value="genre">Genre</option>
-            <option value="artist">Artist</option>
-            <option value="song">Song</option>
-          </select>
+    <>
+      <div
+        className="header"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          color: '#fff',
+          padding: '10px 20px',
+          zIndex: 20,
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          height: '60px'
+        }}
+      >
+        <Navigation currentView={currentView} setCurrentView={setCurrentView} />
+      </div>
+      <h1
+        style={{
+          position: 'absolute',
+          top: '70px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 10,
+          fontSize: '2rem',
+          color: '#fff',
+          background: 'rgba(0, 0, 0, 0.5)',
+          padding: '10px 20px',
+          borderRadius: '8px',
+          textAlign: 'center'
+        }}
+      >
+        Spotify in Data: Popularity of Genres, Artists, and Songs Across the World
+      </h1>
+
+      <div
+        className="map-container"
+        style={{
+          position: 'relative',
+          width: '100vw',
+          height: '100vh',
+          overflow: 'hidden'
+        }}
+      >
+
+        {/* Filter Controls */}
+        <div
+          className="filter-panel"
+          style={{
+            position: 'absolute',
+            bottom: '20px',
+            right: '20px',
+            zIndex: 10,
+            background: 'rgba(255, 255, 255, 0.95)',
+            padding: '20px',
+            borderRadius: '10px',
+            maxWidth: '320px',
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)'
+          }}
+        >
+          <h2 style={{ fontSize: '1.4rem', marginBottom: '1rem' }}>
+            {title}
+          </h2>
+
+          <h3 style={{ marginBottom: '0.5rem' }}>Filter Options</h3>
+
+          <div className="filter-row" style={{ marginBottom: '10px' }}>
+            <label htmlFor="filter-type">Filter by: </label>
+            <select
+              id="filter-type"
+              value={filterType}
+              onChange={(e) => {
+                const newFilterType = e.target.value;
+                setFilterType(newFilterType);
+                setFilterValue('all');
+
+                if (musicData) {
+                  const genres = new Set();
+                  const artists = new Set();
+                  const songs = new Set();
+
+                  musicData.forEach(row => {
+                    genres.add(row.Genre);
+                    artists.add(row.Artist);
+                    songs.add(row.Title);
+                  });
+
+                  updateFilterOptions(newFilterType, { genres, artists, songs });
+                }
+              }}
+              style={{ width: '100%', padding: '6px', fontSize: '0.9rem' }}
+            >
+              <option value="genre">Genre</option>
+              <option value="artist">Artist</option>
+              <option value="song">Song</option>
+            </select>
+          </div>
+
+          <div className="filter-row">
+            <label htmlFor="filter-value">Value: </label>
+            <select
+              id="filter-value"
+              value={filterValue}
+              onChange={(e) => setFilterValue(e.target.value)}
+              style={{ width: '100%', padding: '6px', fontSize: '0.9rem' }}
+            >
+              <option value="all">All</option>
+              {filterOptions.map(option => (
+                <option key={option} value={option}>
+                  {capitalize(option.length > 40 ? option.slice(0, 40) + '…' : option)}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div className="filter-row">
-          <label htmlFor="filter-value">Value: </label>
-          <select
-            id="filter-value"
-            value={filterValue}
-            onChange={(e) => setFilterValue(e.target.value)}
-          >
-            <option value="all">All</option>
-            {filterOptions.map(option => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
+
+        {/* Globe Container */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+          {countryData.length > 0 && (
+            <Globe
+              ref={globeRef}
+              globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+              backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
+              polygonsData={countryData}
+              polygonCapColor={d => d.properties.color}
+              polygonSideColor={() => 'rgba(0, 0, 0, 0.15)'}
+              polygonStrokeColor={() => '#111'}
+              polygonLabel={({ properties: d }) => `
+              <div style="padding: 10px; background: rgba(0, 0, 0, 0.7); border-radius: 5px;">
+                <div><b>${d.NAME || d.ADMIN}</b></div>
+                <div>Popularity: ${d.popularity ? d.popularity.toFixed(2) : 'No data'}</div>
+              </div>
+            `}
+              onPolygonClick={(country) => {
+                const pop = country.properties.popularity;
+                if (typeof pop === 'number' && !isNaN(pop)) {
+                  handleCountryClick(country);
+                }
+              }}
+              polygonsTransitionDuration={300}
+              width={window.innerWidth}
+              height={window.innerHeight}
+              key={JSON.stringify(countryData)}
+            />
+          )}
+        </div>
+
+        {/* Color Legend Overlay */}
+        <div
+          className="color-legend"
+          style={{
+            position: 'absolute',
+            bottom: '20px',
+            left: '20px',
+            background: 'rgba(0,0,0,0.6)',
+            borderRadius: '8px',
+            padding: '10px',
+            color: '#fff',
+            zIndex: 10
+          }}
+        >
+          <div style={{ marginBottom: '5px' }}>Popularity Scale</div>
+          <div
+            style={{
+              background: 'linear-gradient(to right, red, green)',
+              height: '12px',
+              width: '200px',
+              borderRadius: '6px'
+            }}
+          ></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span>Low</span>
+            <span>High</span>
+          </div>
         </div>
       </div>
-      <svg ref={svgRef} width="960" height="500" viewBox="0 0 960 500"></svg>
-    </div>
-  )
+    </>
+  );
 }
 
 export default MapPlot 
