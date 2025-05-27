@@ -12,21 +12,20 @@ function App() {
 
   return (
     <MusicDataProvider>
-      {currentView === 'map' && (
-        <MapPlot
-          currentView={currentView}
-          setCurrentView={setCurrentView}
-          setSelectedCountry={setSelectedCountry}
-        />
-      )}
-      {currentView === 'map' && (
-        <MapPlot
-          currentView={currentView}
-          setCurrentView={setCurrentView}
-          setSelectedCountry={setSelectedCountry}
-        />
-      )}
-      {currentView === 'artist-comparison' && <ArtistComparison />}
+      <div className="app-container">
+        <Navigation currentView={currentView} setCurrentView={setCurrentView} />
+        {currentView === 'map' && (
+          <MapPlot
+            currentView={currentView}
+            setCurrentView={setCurrentView}
+            setSelectedCountry={setSelectedCountry}
+          />
+        )}
+        {currentView === 'country-stats' && (
+          <CountryStatistics selectedCountry={selectedCountry} />
+        )}
+        {currentView === 'artist-comparison' && <ArtistComparison />}
+      </div>
     </MusicDataProvider>
   )
 }
