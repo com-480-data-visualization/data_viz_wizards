@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMusicData } from '../context/MusicDataContext'
 import Globe from 'react-globe.gl'
-import Navigation from './Navigation';
 import Select from 'react-select';
 
 const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
@@ -304,25 +303,6 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
 
   return (
     <>
-      <div
-        className="header"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          background: 'rgba(0, 0, 0, 0.7)',
-          color: '#fff',
-          padding: '10px 20px',
-          zIndex: 20,
-          display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-          height: '60px'
-        }}
-      >
-        <Navigation currentView={currentView} setCurrentView={setCurrentView} />
-      </div>
       <h1
         style={{
           position: 'absolute',

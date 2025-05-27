@@ -1,0 +1,29 @@
+.navigation {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  height: 60px;
+  margin-bottom: 0px;
+}
+
+.navigation button {
+  margin-right: 10px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.navigation button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.navigation button.active {
+  background: rgba(255, 255, 255, 0.2);
+} 
