@@ -27,24 +27,24 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
   }
 
   const typeOptions = useMemo(() => [
-    { value: 'genre',  label: 'Genre'  },
+    { value: 'genre', label: 'Genre' },
     { value: 'artist', label: 'Artist' },
-    { value: 'song',   label: 'Song'   }
+    { value: 'song', label: 'Song' }
   ], [])
 
   const valueOptions = useMemo(() => {
     if (!processedData) return []
     const raw =
-      filterType === 'genre'  ? processedData.genres  :
-      filterType === 'artist' ? processedData.artists :
-      filterType === 'song'   ? processedData.songs   :
-      []
+      filterType === 'genre' ? processedData.genres :
+        filterType === 'artist' ? processedData.artists :
+          filterType === 'song' ? processedData.songs :
+            []
     return [
       { value: 'all', label: 'All' },
       ...raw.map(opt => ({
         value: opt,
         label: opt.length > 40
-          ? opt.slice(0,40) + '…'
+          ? opt.slice(0, 40) + '…'
           : opt
       }))
     ]
@@ -71,18 +71,17 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
   useEffect(() => {
     // Only run once both music data and raw polygons exist
     if (!processedData?.dataByCountry || basePolygons.length === 0) return;
-  
-    // 1) Compute per-country average popularity + min/max
+
     const countryToPopularity = {};
     let min = Infinity, max = 0;
-  
+
     Object.entries(processedData.dataByCountry).forEach(([country, info]) => {
       let songs = info.songs;
       if (filterValue !== 'all') {
         songs = songs.filter(s => {
-          if (filterType === 'genre')  return s.genre === filterValue;
+          if (filterType === 'genre') return s.genre === filterValue;
           if (filterType === 'artist') return s.artist === filterValue;
-          if (filterType === 'song')   return s.title === filterValue;
+          if (filterType === 'song') return s.title === filterValue;
         });
       }
       if (songs.length) {
@@ -92,11 +91,10 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
         max = Math.max(max, avg);
       }
     });
-  
-    // 2) Map raw polygons → colored based on popularity
+
     const updated = basePolygons.map(poly => {
       const name = poly.properties.NAME || poly.properties.ADMIN;
-      const pop  = countryToPopularity[name] || 0;
+      const pop = countryToPopularity[name] || 0;
       return {
         ...poly,
         properties: {
@@ -108,10 +106,9 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
         }
       };
     });
-  
+
     setColoredPolygons(updated);
-  
-    // 3) Update your title
+
     setTitle(
       filterValue === 'all'
         ? 'Overall Average Popularity'
@@ -135,121 +132,12 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
       });
   }, []);
 
-  const updateFilterOptions = (type, { genres, artists, songs }) => {
-    switch (type) {
-      case 'genre':
-        setFilterOptions(Array.from(genres))
-        break
-      case 'artist':
-        setFilterOptions(Array.from(artists))
-        break
-      case 'song':
-        setFilterOptions(Array.from(songs))
-        break
-      default:
-        setFilterOptions([])
-    }
-  }
-
-  const updateVisualization = () => {
-    console.log('Updating visualization with:', {
-      dataByCountryKeys: Object.keys(processedData.dataByCountry),
-      filterType,
-      filterValue,
-      filterOptions
-    })
-
-    // Calculate country popularities
-    const countryToPopularity = {}
-    let maxPopularity = 0;
-    let minPopularity = Infinity;
-    Object.keys(processedData.dataByCountry).forEach(country => {
-      let countryData = processedData.dataByCountry[country]
-      let filteredSongs = countryData.songs
-
-      if (filterValue !== 'all') {
-        filteredSongs = filteredSongs.filter(song => {
-          if (filterType === 'genre') return song.genre === filterValue
-          if (filterType === 'artist') return song.artist === filterValue
-          if (filterType === 'song') return song.title === filterValue
-          return true
-        })
-      }
-
-      if (filteredSongs.length > 0) {
-        const totalPopularity = filteredSongs.reduce((sum, song) => sum + song.popularity, 0)
-        const avgPopularity = totalPopularity / filteredSongs.length
-        countryToPopularity[country] = avgPopularity
-
-        if (avgPopularity > maxPopularity) maxPopularity = avgPopularity
-        if (avgPopularity < minPopularity) minPopularity = avgPopularity
-      } else {
-        countryToPopularity[country] = 0
-      }
-    })
-
-    // Update globe colors based on popularity
-    if (countryData.length > 0) {
-      const updatedCountries = countryData.map(country => {
-        const countryName = country.properties.NAME || country.properties.ADMIN;
-        const mappedName = countryNameMapping[countryName] || countryName;
-        const popularity = countryToPopularity[mappedName] || 0;
-
-        // Add debug logging
-        if (popularity > 0) {
-          console.log(`Country ${mappedName} has popularity ${popularity}`);
-        }
-
-        return {
-          ...country,
-          properties: {
-            ...country.properties,
-            popularity: popularity,
-            color: popularity != null
-              ? getColorForPopularity(popularity, minPopularity, maxPopularity)
-              : '#ccc'
-          }
-        };
-      });
-
-      setCountryData(updatedCountries);
-    }
-
-    // Update title
-    let newTitle = "Music Popularity by Country"
-    if (filterValue !== "all") {
-      switch (filterType) {
-        case "genre":
-          newTitle = `Popularity of ${filterValue}`
-          break
-        case "artist":
-          newTitle = `Popularity of ${filterValue}`
-          break
-        case "song":
-          newTitle = `Popularity of ${filterValue}`
-          break
-      }
-    } else {
-      newTitle = "Overall Average Popularity"
-    }
-    setTitle(newTitle)
-  }
-
-  const getColorForPopularity = (popularity, minPopularity, maxPopularity) => {
-    // Grey for no data
-    if (!popularity) return '#ccc';
-
-    // Normalize to [0,1] and clamp
-    const t = Math.max(0, Math.min(1, (popularity - minPopularity) / (maxPopularity - minPopularity)));
-
-    return interpolateViridis(t);
-  }
 
   const handleCountryClick = (country) => {
     const countryName = country.properties.NAME || country.properties.ADMIN;
     const mappedName = countryNameMapping[countryName] || countryName;
 
-    if (dataByCountry[mappedName]) {
+    if (processedData.dataByCountry?.[mappedName]) {
       setSelectedCountry(mappedName);
       setCurrentView('country-stats');
       console.log(`Navigating to statistics for: ${mappedName}`);
@@ -343,19 +231,15 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
 
         <h3 style={{ marginBottom: '0.5rem' }}>Filter Options</h3>
 
-        <div className="filter-row" style={{ marginBottom: '10px' }}>
+        {/* Filter by type */}
+        <div className="filter-row" style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
           <label style={{ marginRight: '8px' }}>Filter by:</label>
           <Select
             styles={selectStyles}
-            options={[
-              { value: 'genre', label: 'Genre' },
-              { value: 'artist', label: 'Artist' },
-              { value: 'song', label: 'Song' }
-            ]}
-            value={{ value: filterType, label: capitalize(filterType) }}
+            options={typeOptions}                                // ← use the memoized list
+            value={typeOptions.find(o => o.value === filterType)}
             onChange={opt => {
-              const newType = opt.value
-              setFilterType(newType)
+              setFilterType(opt.value)
               setFilterValue('all')
             }}
             isSearchable
@@ -365,18 +249,12 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
         </div>
 
         {/* Filter by value */}
-        <div className="filter-row">
+        <div className="filter-row" style={{ display: 'flex', alignItems: 'center' }}>
           <label style={{ marginRight: '8px' }}>Value:</label>
           <Select
             styles={selectStyles}
-            options={[
-              { value: 'all', label: 'All' },
-              ...filterOptions.map(opt => ({
-                value: opt,
-                label: capitalize(opt.length > 40 ? opt.slice(0, 40) + '…' : opt)
-              }))
-            ]}
-            value={{ value: filterValue, label: capitalize(filterValue) }}
+            options={valueOptions}                               // ← use the memoized list
+            value={valueOptions.find(o => o.value === filterValue)}
             onChange={opt => setFilterValue(opt.value)}
             isSearchable
             placeholder="Select value…"
