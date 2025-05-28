@@ -36,15 +36,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'none'
+          cache: 'npm'
       
-      - name: Clean slate
-        run: |
-          rm -rf node_modules package-lock.json
-
-      - name: Install dependencies (omit optional)
-        env:
-          npm_config_omit: optional
+      - name: Install dependencies
         run: npm ci
       
       - name: Build
