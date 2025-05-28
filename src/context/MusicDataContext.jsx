@@ -3,7 +3,6 @@ import * as d3 from 'd3'
 
 const MusicDataContext = createContext()
 
-
 export const useMusicData = () => {
   const context = useContext(MusicDataContext)
   if (!context) {
@@ -17,6 +16,93 @@ const titleCase = str =>
     .split(' ')
     .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
     .join(' ')
+const parseArtistString = (artistStr) => {
+  try {
+    // Remove the outer square brackets and split by comma
+    const cleanStr = artistStr.replace(/[\[\]]/g, '')
+    // Split by comma and clean up each artist name
+    return cleanStr.split(',')
+      .map(artist => {
+        // First trim whitespace
+        let cleanArtist = artist.trim()
+        // Remove single quotes at the start and end
+        cleanArtist = cleanArtist.replace(/^'|'$/g, '')
+        // Remove double quotes at the start and end
+        cleanArtist = cleanArtist.replace(/^"|"$/g, '')
+        return cleanArtist
+      })
+      .filter(artist => artist) // Remove empty strings
+  } catch (error) {
+    console.error('Error parsing artist string:', artistStr, error)
+    return []
+  }
+}
+
+const processArtistData = (musicData) => {
+  console.log('Processing artist data...')
+  const allArtists = new Set()
+  
+  musicData.forEach(song => {
+    const songArtists = parseArtistString(song.Artist)
+    songArtists.forEach(artist => {
+      if (artist) {
+        allArtists.add(artist)
+      }
+    })
+  })
+  
+  // Convert to array and sort
+  const uniqueArtists = Array.from(allArtists).sort((a, b) => a.localeCompare(b))
+  
+  console.log('Artist processing complete:', {
+    totalArtists: uniqueArtists.length,
+    sampleArtists: uniqueArtists.slice(0, 5)
+  })
+  
+  return uniqueArtists
+}
+
+const calculateArtistStats = (musicData, artist) => {
+  if (!artist || !musicData) return null;
+  
+  const artistSongs = musicData.filter(song => {
+    const songArtists = parseArtistString(song.Artist)
+    return songArtists.includes(artist)
+  })
+  
+  if (artistSongs.length === 0) return null;
+  
+  const attributes = {
+    danceability: 0,
+    energy: 0,
+    speechiness: 0,
+    acoustics: 0,
+    instrumentalness: 0,
+    liveliness: 0,
+    valence: 0,
+    tempo: 0
+  }
+  
+  artistSongs.forEach(song => {
+    attributes.danceability += parseFloat(song.danceability) || 0
+    attributes.energy += parseFloat(song.energy) || 0
+    attributes.speechiness += parseFloat(song.speechiness) || 0
+    attributes.acoustics += parseFloat(song.acoustics) || 0
+    attributes.instrumentalness += parseFloat(song.instrumentalness) || 0
+    attributes.liveliness += parseFloat(song.liveliness) || 0
+    attributes.valence += parseFloat(song.valence) || 0
+    attributes.tempo += parseFloat(song.tempo) || 0
+  })
+  
+  Object.keys(attributes).forEach(key => {
+    attributes[key] = attributes[key] / artistSongs.length
+  })
+  
+  return {
+    attributes,
+    songCount: artistSongs.length
+  }
+}
 
 const processData = (musicData) => {
   console.log('Processing music data...')
@@ -94,6 +180,7 @@ const processData = (musicData) => {
 export const MusicDataProvider = ({ children }) => {
   const [musicData, setMusicData] = useState(null)
   const [processedData, setProcessedData] = useState(null)
+  const [artists, setArtists] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -110,6 +197,8 @@ export const MusicDataProvider = ({ children }) => {
         setMusicData(data)
         const processed = processData(data)
         setProcessedData(processed)
+        const artistList = processArtistData(data)
+        setArtists(artistList)
       } catch (err) {
         console.error('Error loading music data:', err)
         setError(err)
@@ -124,6 +213,8 @@ export const MusicDataProvider = ({ children }) => {
   const value = {
     musicData,
     processedData,
+    artists,
+    calculateArtistStats: (artist) => calculateArtistStats(musicData, artist),
     loading,
     error
   }

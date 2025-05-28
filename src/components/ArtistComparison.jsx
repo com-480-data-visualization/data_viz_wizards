@@ -7,10 +7,89 @@ import '../css/ArtistComparison.css'
 
 const ArtistComparison = () => {
   const svgRef = useRef(null)
-  const { musicData, loading, error } = useMusicData()
-  const [artists, setArtists] = useState([])
+  const { artists, calculateArtistStats, loading, error } = useMusicData()
   const [selectedArtists, setSelectedArtists] = useState([])
   const [artistStats, setArtistStats] = useState({})
+  const [tooltipContent, setTooltipContent] = useState(null)
+  const [hoveredAttribute, setHoveredAttribute] = useState(null)
+
+  // Feature descriptions and level descriptions
+  const featureDescriptions = {
+    danceability: {
+      tooltip: "How dance-friendly a track is, from very rigid to groove-filled.",
+      levels: {
+        low: "Tracks feel rigid or uneven for dancing.",
+        medium: "Moderately danceable—steady beat but not urgent.",
+        high: "Very danceable—strong groove and steady rhythm."
+      }
+    },
+    energy: {
+      tooltip: "Perceived intensity: volume, tempo, and dynamic activity.",
+      levels: {
+        low: "Calm or minimal activity.",
+        medium: "Moderately intense—some punch, not overwhelming.",
+        high: "High-octane: loud, fast, and driving."
+      }
+    },
+    speechiness: {
+      tooltip: "How vocal/speech-like the track is (e.g. talk vs. singing vs. rap).",
+      levels: {
+        low: "Mostly music, little to no speech.",
+        medium: "Mix of singing and spoken/rap sections.",
+        high: "Predominantly spoken word (podcast/rap)."
+      }
+    },
+    acoustics: {
+      tooltip: "Confidence that the track is acoustic (no electric/processed sounds).",
+      levels: {
+        low: "Almost no acoustic elements.",
+        medium: "Blend of acoustic and electronic production.",
+        high: "Predominantly acoustic (guitar, piano, etc.)."
+      }
+    },
+    instrumentalness: {
+      tooltip: "Likelihood a track has no vocals (treats \"ooh/aah\" as instrumental).",
+      levels: {
+        low: "Vocals clearly present.",
+        medium: "Some instrumental passages, but still singers.",
+        high: "Fully instrumental, no vocals at all."
+      }
+    },
+    liveliness: {
+      tooltip: "Probability an audience is present (live vs. studio recording).",
+      levels: {
+        low: "Studio-clean, no crowd noise.",
+        medium: "Some live ambience or crowd hints in mix.",
+        high: "Strong live feel—audience noise & hall reverb."
+      }
+    },
+    valence: {
+      tooltip: "Musical positiveness: happy/cheerful vs. sad/angry mood.",
+      levels: {
+        low: "Darker or more negative mood.",
+        medium: "Mixed emotions—neither overtly happy nor sad.",
+        high: "Bright, upbeat, and cheerful."
+      }
+    }
+  }
+
+  // Function to determine value level
+  const getValueLevel = (value) => {
+    if (value <= 0.33) return 'low'
+    if (value <= 0.66) return 'medium'
+    return 'high'
+  }
+
+  // Emoji mappings for attributes
+  const attributeEmojis = {
+    danceability: '💃',
+    energy: '⚡️',
+    speechiness: '🗣️',
+    acoustics: '🎸',
+    instrumentalness: '🎹',
+    liveliness: '🎤',
+    valence: '😊'
+  }
 
   // Color palette for multiple artists
   const colors = [
@@ -18,97 +97,10 @@ const ArtistComparison = () => {
     '#ff00ff', '#00ffff', '#ff0000', '#0000ff', '#ffff00'
   ]
 
-  const parseArtistString = (artistStr) => {
-    try {
-      // Remove the outer square brackets and split by comma
-      const cleanStr = artistStr.replace(/[\[\]]/g, '')
-      // Split by comma and clean up each artist name
-      return cleanStr.split(',')
-        .map(artist => {
-          // First trim whitespace
-          let cleanArtist = artist.trim()
-          // Remove single quotes at the start and end
-          cleanArtist = cleanArtist.replace(/^'|'$/g, '')
-          // Remove double quotes at the start and end
-          cleanArtist = cleanArtist.replace(/^"|"$/g, '')
-          return cleanArtist
-        })
-        .filter(artist => artist) // Remove empty strings
-    } catch (error) {
-      console.error('Error parsing artist string:', artistStr, error)
-      return []
-    }
-  }
-
   useEffect(() => {
-    if (musicData) {
-      // Extract all unique artists from the arrays
-      const allArtists = new Set()
-      musicData.forEach(song => {
-        const songArtists = parseArtistString(song.Artist)
-        songArtists.forEach(artist => {
-          if (artist) {
-            allArtists.add(artist)
-          }
-        })
-      })
-      
-      // Convert to array and sort
-      const uniqueArtists = Array.from(allArtists).sort((a, b) => a.localeCompare(b))
-      
-      console.log('Processed artists:', {
-        totalArtists: uniqueArtists.length,
-        sampleArtists: uniqueArtists.slice(0, 5)
-      })
-      
-      setArtists(uniqueArtists)
-    }
-  }, [musicData])
-
-  useEffect(() => {
-    if (musicData && selectedArtists.length > 0) {
+    if (selectedArtists.length > 0) {
       const stats = {}
       
-      const calculateArtistStats = (artist) => {
-        if (!artist) return null;
-        
-        const artistSongs = musicData.filter(song => {
-          const songArtists = parseArtistString(song.Artist)
-          return songArtists.includes(artist)
-        })
-        
-        const attributes = {
-          danceability: 0,
-          energy: 0,
-          speechiness: 0,
-          acoustics: 0,
-          instrumentalness: 0,
-          liveliness: 0,
-          valence: 0,
-          tempo: 0
-        }
-        
-        artistSongs.forEach(song => {
-          attributes.danceability += parseFloat(song.danceability) || 0
-          attributes.energy += parseFloat(song.energy) || 0
-          attributes.speechiness += parseFloat(song.speechiness) || 0
-          attributes.acoustics += parseFloat(song.acoustics) || 0
-          attributes.instrumentalness += parseFloat(song.instrumentalness) || 0
-          attributes.liveliness += parseFloat(song.liveliness) || 0
-          attributes.valence += parseFloat(song.valence) || 0
-          attributes.tempo += parseFloat(song.tempo) || 0
-        })
-        
-        Object.keys(attributes).forEach(key => {
-          attributes[key] = attributes[key] / artistSongs.length
-        })
-        
-        return {
-          attributes,
-          songCount: artistSongs.length
-        }
-      }
-
       selectedArtists.forEach(artist => {
         stats[artist] = calculateArtistStats(artist)
       })
@@ -117,7 +109,7 @@ const ArtistComparison = () => {
     } else {
       setArtistStats({})
     }
-  }, [musicData, selectedArtists])
+  }, [selectedArtists, calculateArtistStats])
 
   const handleArtistChange = (values) => {
     setSelectedArtists(values)
@@ -144,63 +136,140 @@ const ArtistComparison = () => {
       <div className="artist-stats-comparison">
         {selectedArtists.length > 0 && (
           <div className="radar-chart-container">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={(() => {
-                if (selectedArtists.length === 0) return [];
-                
-                const attributes = ['danceability', 'energy', 'speechiness', 'acoustics', 
-                                 'instrumentalness', 'liveliness', 'valence'];
-                
-                return attributes.map(attr => {
-                  const dataPoint = { attribute: attr };
-                  selectedArtists.forEach(artist => {
-                    if (artistStats[artist]?.attributes) {
-                      dataPoint[artist] = artistStats[artist].attributes[attr];
-                    }
-                  });
-                  return dataPoint;
-                });
-              })()}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="attribute" />
-                <PolarRadiusAxis angle={30} domain={[0, 1]} />
-                <Tooltip 
-                  content={({ active, payload, label }) => {
-                    if (active && payload && payload.length) {
+            <div className="chart-section">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart 
+                  key={selectedArtists.join('-')}
+                  cx="50%" 
+                  cy="50%" 
+                  outerRadius="80%" 
+                  data={(() => {
+                    if (selectedArtists.length === 0) return [];
+                    
+                    const attributes = ['danceability', 'energy', 'speechiness', 'acoustics', 
+                                     'instrumentalness', 'liveliness', 'valence'];
+                    
+                    return attributes.map(attr => {
+                      const dataPoint = { attribute: attr };
+                      selectedArtists.forEach(artist => {
+                        if (artistStats[artist]?.attributes) {
+                          dataPoint[artist] = artistStats[artist].attributes[attr];
+                        }
+                      });
+                      return dataPoint;
+                    });
+                  })()}
+                  margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                >
+                  <PolarGrid />
+                  <PolarAngleAxis 
+                    dataKey="attribute" 
+                    tick={({ payload, x, y, textAnchor, ...props }) => {
+                      const isHovered = hoveredAttribute === payload.value
                       return (
-                        <div className="custom-tooltip">
-                          <p className="tooltip-label">{label}</p>
-                          {payload.map((entry, index) => (
-                            <p key={index} style={{ color: entry.color }}>
-                              {entry.name}: {entry.value.toFixed(3)}
-                            </p>
-                          ))}
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                {selectedArtists.map((artist, index) => (
-                  <Radar
-                    key={artist}
-                    name={artist}
-                    dataKey={artist}
-                    stroke={colors[index % colors.length]}
-                    fill={colors[index % colors.length]}
-                    fillOpacity={0.3}
+                        <g>
+                          {isHovered && (
+                            <circle
+                              cx={x}
+                              cy={y - 15}
+                              r={4}
+                              fill="#ff6b6b"
+                              stroke="#fff"
+                              strokeWidth={2}
+                            />
+                          )}
+                          <text
+                            x={x}
+                            y={y}
+                            textAnchor={textAnchor}
+                            fill={isHovered ? "#ff6b6b" : "#666"}
+                            fontSize={isHovered ? "14px" : "12px"}
+                            fontWeight={isHovered ? "bold" : "normal"}
+                            {...props}
+                          >
+                            {attributeEmojis[payload.value]} {payload.value}
+                          </text>
+                        </g>
+                      )
+                    }}
                   />
-                ))}
-                <Legend />
-              </RadarChart>
-            </ResponsiveContainer>
-            <div className="artist-stats-info">
-              {selectedArtists.map((artist) => (
-                <div key={artist} className="artist-stat-info">
-                  <h4>{artist}</h4>
-                  <p>Number of songs: {artistStats[artist]?.songCount || 0}</p>
+                  <PolarRadiusAxis angle={30} domain={[0, 1]} />
+                  <Tooltip 
+                    content={({ active, payload, label }) => {
+                      if (active && payload && payload.length) {
+                        const featureInfo = featureDescriptions[label]
+                        setTooltipContent({
+                          label,
+                          featureInfo,
+                          payload
+                        })
+                        setHoveredAttribute(label)
+                      } else {
+                        setTooltipContent(null)
+                        setHoveredAttribute(null)
+                      }
+                      return null; // Don't render anything here
+                    }}
+                  />
+                  {selectedArtists.map((artist, index) => (
+                    <Radar
+                      key={artist}
+                      name={artist}
+                      dataKey={artist}
+                      stroke={colors[index % colors.length]}
+                      fill={colors[index % colors.length]}
+                      fillOpacity={0.3}
+                      strokeWidth={2}
+                      animationBegin={index * 150}
+                      animationDuration={600}
+                      animationEasing="ease-in-out"
+                      isAnimationActive={true}
+                    />
+                  ))}
+                  <Legend />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+            
+            <div className="tooltip-panel">
+              {tooltipContent ? (
+                <div className="tooltip-panel-content">
+                  <div className="tooltip-header">
+                    <p className="tooltip-title">
+                      {attributeEmojis[tooltipContent.label]} {tooltipContent.label.charAt(0).toUpperCase() + tooltipContent.label.slice(1)}
+                    </p>
+                    {tooltipContent.featureInfo && (
+                      <p className="tooltip-description">{tooltipContent.featureInfo.tooltip}</p>
+                    )}
+                  </div>
+                  
+                  <div className="tooltip-values">
+                    {tooltipContent.payload
+                      .sort((a, b) => b.value - a.value)
+                      .map((entry, index) => {
+                        const level = getValueLevel(entry.value)
+                        const levelDescription = tooltipContent.featureInfo?.levels[level]
+                        
+                        return (
+                          <div key={index} className="tooltip-artist-info">
+                            <p className="tooltip-artist" style={{ color: entry.color }}>
+                              <strong>{entry.name}</strong>: {entry.value.toFixed(3)}
+                            </p>
+                            {levelDescription && (
+                              <p className="tooltip-level-description">
+                                {levelDescription}
+                              </p>
+                            )}
+                          </div>
+                        )
+                      })}
+                  </div>
                 </div>
-              ))}
+              ) : (
+                <div className="tooltip-panel-placeholder">
+                  <p>Hover over the chart to see detailed information about musical attributes</p>
+                </div>
+              )}
             </div>
           </div>
         )}

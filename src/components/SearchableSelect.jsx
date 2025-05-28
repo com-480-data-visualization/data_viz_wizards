@@ -11,6 +11,7 @@ const SearchableSelect = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [removingTag, setRemovingTag] = useState(null)
   const dropdownRef = useRef(null)
 
   // Filter options based on search term
@@ -45,6 +46,16 @@ const SearchableSelect = ({
     }
   }
 
+  const handleRemoveTag = (tagToRemove) => {
+    setRemovingTag(tagToRemove)
+    
+    // Wait for animation to complete before actually removing
+    setTimeout(() => {
+      onChange(prev => prev.filter(item => item !== tagToRemove))
+      setRemovingTag(null)
+    }, 300) // Match the animation duration
+  }
+
   return (
     <div className="searchable-select" ref={dropdownRef}>
       <div className="select-header" onClick={() => setIsOpen(!isOpen)}>
@@ -52,13 +63,16 @@ const SearchableSelect = ({
           {selectedValues.length > 0 ? (
             <div className="selected-tags">
               {selectedValues.map(value => (
-                <span key={value} className="selected-tag">
+                <span 
+                  key={value} 
+                  className={`selected-tag ${removingTag === value ? 'removing' : ''}`}
+                >
                   {value}
                   {multiple && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        handleSelect(value)
+                        handleRemoveTag(value)
                       }}
                       className="remove-tag"
                     >
@@ -72,7 +86,7 @@ const SearchableSelect = ({
             <span className="placeholder">{placeholder}</span>
           )}
         </div>
-        <span className="dropdown-arrow">▼</span>
+        <span className={`dropdown-arrow ${isOpen ? 'open' : ''}`}>▼</span>
       </div>
 
       {isOpen && (
@@ -84,6 +98,7 @@ const SearchableSelect = ({
             placeholder={placeholder}
             onClick={(e) => e.stopPropagation()}
             className="search-input"
+            autoFocus
           />
           <div className="options-list">
             {filteredOptions.length > 0 ? (
