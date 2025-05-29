@@ -115,165 +115,237 @@ const ArtistComparison = () => {
     setSelectedArtists(values)
   }
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>Error loading data: {error.message}</div>
+  if (loading) return <div className="loading">Loading...</div>
+  if (error) return <div className="error">Error loading data: {error.message}</div>
 
   return (
-    <div className="artist-comparison-container">
-      <div className="artist-selectors">
-        <div className="artist-selector">
-          <h3>Select Artists</h3>
-          <SearchableSelect
-            options={artists}
-            selectedValues={selectedArtists}
-            onChange={handleArtistChange}
-            placeholder="Search artists..."
-            label="Select artists to compare"
-            multiple={true}
-          />
+    <div className="artist-comparison-dashboard">
+      <div className="dashboard-header">
+        <div>
+          <h1 className="dashboard-title">Artist Comparison Dashboard</h1>
+          <p className="dashboard-subtitle">Compare Musical Attributes Across Multiple Artists</p>
+        </div>
+        <div className="dashboard-note">
+          Interactive Radar Chart Analysis
         </div>
       </div>
-      <div className="artist-stats-comparison">
-        {selectedArtists.length > 0 && (
-          <div className="radar-chart-container">
-            <div className="chart-section">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart 
-                  key={selectedArtists.join('-')}
-                  cx="50%" 
-                  cy="50%" 
-                  outerRadius="80%" 
-                  data={(() => {
-                    if (selectedArtists.length === 0) return [];
-                    
-                    const attributes = ['danceability', 'energy', 'speechiness', 'acoustics', 
-                                     'instrumentalness', 'liveliness', 'valence'];
-                    
-                    return attributes.map(attr => {
-                      const dataPoint = { attribute: attr };
-                      selectedArtists.forEach(artist => {
-                        if (artistStats[artist]?.attributes) {
-                          dataPoint[artist] = artistStats[artist].attributes[attr];
-                        }
-                      });
-                      return dataPoint;
-                    });
-                  })()}
-                  margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-                >
-                  <PolarGrid />
-                  <PolarAngleAxis 
-                    dataKey="attribute" 
-                    tick={({ payload, x, y, textAnchor, ...props }) => {
-                      const isHovered = hoveredAttribute === payload.value
-                      return (
-                        <g>
-                          {isHovered && (
-                            <circle
-                              cx={x}
-                              cy={y - 15}
-                              r={4}
-                              fill="#ff6b6b"
-                              stroke="#fff"
-                              strokeWidth={2}
-                            />
-                          )}
-                          <text
-                            x={x}
-                            y={y}
-                            textAnchor={textAnchor}
-                            fill={isHovered ? "#ff6b6b" : "#666"}
-                            fontSize={isHovered ? "14px" : "12px"}
-                            fontWeight={isHovered ? "bold" : "normal"}
-                            {...props}
-                          >
-                            {attributeEmojis[payload.value]} {payload.value}
-                          </text>
-                        </g>
-                      )
-                    }}
-                  />
-                  <PolarRadiusAxis angle={30} domain={[0, 1]} />
-                  <Tooltip 
-                    content={({ active, payload, label }) => {
-                      if (active && payload && payload.length) {
-                        const featureInfo = featureDescriptions[label]
-                        setTooltipContent({
-                          label,
-                          featureInfo,
-                          payload
-                        })
-                        setHoveredAttribute(label)
-                      } else {
-                        setTooltipContent(null)
-                        setHoveredAttribute(null)
-                      }
-                      return null; // Don't render anything here
-                    }}
-                  />
-                  {selectedArtists.map((artist, index) => (
-                    <Radar
-                      key={artist}
-                      name={artist}
-                      dataKey={artist}
-                      stroke={colors[index % colors.length]}
-                      fill={colors[index % colors.length]}
-                      fillOpacity={0.3}
-                      strokeWidth={2}
-                      animationBegin={index * 150}
-                      animationDuration={600}
-                      animationEasing="ease-in-out"
-                      isAnimationActive={true}
-                    />
-                  ))}
-                  <Legend />
-                </RadarChart>
-              </ResponsiveContainer>
+
+      <div className="artist-selector-section">
+        <div className="selector-header">
+          <h3 className="selector-title">Select Artists to Compare</h3>
+          <p className="selector-subtitle">Choose multiple artists to analyze their musical attributes</p>
+        </div>
+        <SearchableSelect
+          options={artists}
+          selectedValues={selectedArtists}
+          onChange={handleArtistChange}
+          placeholder="Search artists..."
+          label="Select artists to compare"
+          maxSelections={4}
+          multiple={true}
+        />
+      </div>
+
+      {selectedArtists.length > 0 && (
+        <div className="comparison-section">
+          <div className="radar-chart-card">
+            <div className="card-header">
+              <h3 className="card-title">Musical Attributes Comparison</h3>
+              <div className="card-icon">
+                <svg viewBox="0 0 24 24">
+                  <path d="M3.05 13H1v-2h2.05C3.5 6.83 6.83 3.5 11 3.05V1h2v2.05C17.17 3.5 20.5 6.83 20.95 11H23v2h-2.05C20.5 17.17 17.17 20.5 13 20.95V23h-2v-2.05C6.83 20.5 3.5 17.17 3.05 13zM12 19c3.87 0 7-3.13 7-7s-3.13-7-7-7-7 3.13-7 7 3.13 7 7 7z"/>
+                </svg>
+              </div>
             </div>
-            
-            <div className="tooltip-panel">
-              {tooltipContent ? (
-                <div className="tooltip-panel-content">
-                  <div className="tooltip-header">
-                    <p className="tooltip-title">
-                      {attributeEmojis[tooltipContent.label]} {tooltipContent.label.charAt(0).toUpperCase() + tooltipContent.label.slice(1)}
-                    </p>
-                    {tooltipContent.featureInfo && (
-                      <p className="tooltip-description">{tooltipContent.featureInfo.tooltip}</p>
-                    )}
-                  </div>
-                  
-                  <div className="tooltip-values">
-                    {tooltipContent.payload
-                      .sort((a, b) => b.value - a.value)
-                      .map((entry, index) => {
-                        const level = getValueLevel(entry.value)
-                        const levelDescription = tooltipContent.featureInfo?.levels[level]
+            <div className="card-body">
+              <div className="radar-chart-container">
+                <div className="chart-section">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart 
+                      key={selectedArtists.join('-')}
+                      cx="50%" 
+                      cy="50%" 
+                      outerRadius="80%" 
+                      data={(() => {
+                        if (selectedArtists.length === 0) return [];
                         
-                        return (
-                          <div key={index} className="tooltip-artist-info">
-                            <p className="tooltip-artist" style={{ color: entry.color }}>
-                              <strong>{entry.name}</strong>: {entry.value.toFixed(3)}
-                            </p>
-                            {levelDescription && (
-                              <p className="tooltip-level-description">
-                                {levelDescription}
-                              </p>
-                            )}
-                          </div>
-                        )
-                      })}
-                  </div>
+                        const attributes = ['danceability', 'energy', 'speechiness', 'acoustics', 
+                                         'instrumentalness', 'liveliness', 'valence'];
+                        
+                        return attributes.map(attr => {
+                          const dataPoint = { attribute: attr };
+                          selectedArtists.forEach(artist => {
+                            if (artistStats[artist]?.attributes) {
+                              dataPoint[artist] = artistStats[artist].attributes[attr];
+                            }
+                          });
+                          return dataPoint;
+                        });
+                      })()}
+                      margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                    >
+                      <PolarGrid />
+                      <PolarAngleAxis 
+                        dataKey="attribute" 
+                        tick={({ payload, x, y, textAnchor, ...props }) => {
+                          const isHovered = hoveredAttribute === payload.value
+                          return (
+                            <g
+                              onMouseEnter={() => setHoveredAttribute(payload.value)}
+                              onMouseLeave={() => setHoveredAttribute(null)}
+                              style={{ cursor: 'pointer' }}
+                            >
+                              {/* Enhanced background circle for hovered state */}
+                              {isHovered && (
+                                <circle
+                                  cx={x}
+                                  cy={y - 18}
+                                  r={6}
+                                  fill="#1DB954"
+                                  stroke="#fff"
+                                  strokeWidth={2}
+                                  style={{
+                                    filter: 'drop-shadow(0 0 8px #1DB954)'
+                                  }}
+                                />
+                              )}
+                              <text
+                                x={x}
+                                y={y}
+                                textAnchor={textAnchor}
+                                fill={isHovered ? "#1DB954" : "#FFFFFF"}
+                                fontSize={isHovered ? "16px" : "12px"}
+                                fontWeight={isHovered ? "900" : "500"}
+                                stroke="none"
+                                style={{ 
+                                  fontFamily: 'Circular Std, Helvetica Neue, Arial, sans-serif',
+                                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                  cursor: 'pointer'
+                                }}
+                                {...props}
+                              >
+                                {attributeEmojis[payload.value]} {payload.value}
+                              </text>
+                            </g>
+                          )
+                        }}
+                      />
+                      <PolarRadiusAxis angle={30} domain={[0, 1]} />
+                      <Tooltip 
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            const featureInfo = featureDescriptions[label]
+                            setTooltipContent({
+                              label,
+                              featureInfo,
+                              payload
+                            })
+                            setHoveredAttribute(label)
+                          } else {
+                            setTooltipContent(null)
+                            setHoveredAttribute(null)
+                          }
+                          return null;
+                        }}
+                      />
+                      {selectedArtists.map((artist, index) => (
+                        <Radar
+                          key={artist}
+                          name={artist}
+                          dataKey={artist}
+                          stroke={colors[index % colors.length]}
+                          fill={colors[index % colors.length]}
+                          fillOpacity={0.3}
+                          strokeWidth={2}
+                          animationBegin={index * 150}
+                          animationDuration={600}
+                          animationEasing="ease-in-out"
+                          isAnimationActive={true}
+                        />
+                      ))}
+                      <Legend />
+                    </RadarChart>
+                  </ResponsiveContainer>
                 </div>
-              ) : (
-                <div className="tooltip-panel-placeholder">
-                  <p>Hover over the chart to see detailed information about musical attributes</p>
+                
+                <div className="tooltip-panel">
+                  {tooltipContent ? (
+                    <div className="tooltip-panel-content">
+                      <div className="tooltip-header">
+                        <p className="tooltip-title">
+                          {attributeEmojis[tooltipContent.label]} {tooltipContent.label.charAt(0).toUpperCase() + tooltipContent.label.slice(1)}
+                        </p>
+                      </div>
+                      
+                      <div className="four-column-container">
+                        {/* Top description spanning all columns */}
+                        <div className="wide-description top-description">
+                          <p>{tooltipContent.featureInfo?.levels.high || "High level"}</p>
+                        </div>
+                        
+                        {/* Main content area with four artist columns */}
+                        <div className="main-content-area">
+                          {/* Artist columns (all 4) */}
+                          {Array.from({ length: 4 }).map((_, columnIndex) => {
+                            const artist = tooltipContent.payload[columnIndex];
+                            return (
+                              <div key={columnIndex} className="artist-column">
+                                <div className="artist-track">
+                                  {artist && (
+                                    <div
+                                      className="artist-indicator"
+                                      style={{
+                                        bottom: `calc(${artist.value * 100}% * 1 + 2.5%)`,
+                                      }}
+                                    >
+                                      <div
+                                        className="artist-dot"
+                                        style={{
+                                          backgroundColor: artist.color,
+                                          borderColor: artist.color,
+                                        }}
+                                      />
+                                      <div className="artist-info">
+                                        <div className="artist-name">{artist.name}</div>
+                                        <div className="artist-percentage">{(artist.value * 100).toFixed(1)}%</div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        
+                        {/* Bottom description spanning all columns */}
+                        <div className="wide-description bottom-description">
+                          <p>{tooltipContent.featureInfo?.levels.low || "Low level"}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="tooltip-panel-placeholder">
+                      <p>Hover over the chart to see detailed information about musical attributes</p>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+            </div>
+            <div className="card-footer">
+              Compare audio features across selected artists using interactive radar visualization
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {selectedArtists.length === 0 && (
+        <div className="empty-state">
+          <div className="empty-state-content">
+            <h3>No Artists Selected</h3>
+            <p>Select one or more artists above to begin comparing their musical attributes</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

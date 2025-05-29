@@ -7,7 +7,8 @@ const SearchableSelect = ({
   onChange,
   placeholder = 'Search...',
   label = 'Select items',
-  multiple = true
+  multiple = true,
+  maxSelections = null
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
@@ -34,9 +35,16 @@ const SearchableSelect = ({
   const handleSelect = (option) => {
     if (multiple) {
       onChange(prev => {
+        // If option is already selected, remove it
         if (prev.includes(option)) {
           return prev.filter(item => item !== option)
-        } else {
+        } 
+        // If maxSelections is set and we've reached the limit, don't add
+        else if (maxSelections && prev.length >= maxSelections) {
+          return prev
+        } 
+        // Otherwise add the new option
+        else {
           return [...prev, option]
         }
       })
@@ -105,10 +113,15 @@ const SearchableSelect = ({
               filteredOptions.map(option => (
                 <div
                   key={option}
-                  className={`option ${selectedValues.includes(option) ? 'selected' : ''}`}
+                  className={`option ${selectedValues.includes(option) ? 'selected' : ''} ${
+                    maxSelections && selectedValues.length >= maxSelections && !selectedValues.includes(option) ? 'disabled' : ''
+                  }`}
                   onClick={() => handleSelect(option)}
                 >
                   {option}
+                  {maxSelections && selectedValues.length >= maxSelections && !selectedValues.includes(option) && (
+                    <span className="max-selections-note"> (Max limit reached)</span>
+                  )}
                 </div>
               ))
             ) : (

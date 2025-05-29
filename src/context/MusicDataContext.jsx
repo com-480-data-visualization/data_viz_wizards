@@ -38,69 +38,24 @@ const parseArtistString = (artistStr) => {
   }
 }
 
-const processArtistData = (musicData) => {
-  console.log('Processing artist data...')
-  const allArtists = new Set()
+const calculateArtistStats = (artistStatsData, artist) => {
+  if (!artist || !artistStatsData) return null;
   
-  musicData.forEach(song => {
-    const songArtists = parseArtistString(song.Artist)
-    songArtists.forEach(artist => {
-      if (artist) {
-        allArtists.add(artist)
-      }
-    })
-  })
-  
-  // Convert to array and sort
-  const uniqueArtists = Array.from(allArtists).sort((a, b) => a.localeCompare(b))
-  
-  console.log('Artist processing complete:', {
-    totalArtists: uniqueArtists.length,
-    sampleArtists: uniqueArtists.slice(0, 5)
-  })
-  
-  return uniqueArtists
-}
-
-const calculateArtistStats = (musicData, artist) => {
-  if (!artist || !musicData) return null;
-  
-  const artistSongs = musicData.filter(song => {
-    const songArtists = parseArtistString(song.Artist)
-    return songArtists.includes(artist)
-  })
-  
-  if (artistSongs.length === 0) return null;
-  
-  const attributes = {
-    danceability: 0,
-    energy: 0,
-    speechiness: 0,
-    acoustics: 0,
-    instrumentalness: 0,
-    liveliness: 0,
-    valence: 0,
-    tempo: 0
-  }
-  
-  artistSongs.forEach(song => {
-    attributes.danceability += parseFloat(song.danceability) || 0
-    attributes.energy += parseFloat(song.energy) || 0
-    attributes.speechiness += parseFloat(song.speechiness) || 0
-    attributes.acoustics += parseFloat(song.acoustics) || 0
-    attributes.instrumentalness += parseFloat(song.instrumentalness) || 0
-    attributes.liveliness += parseFloat(song.liveliness) || 0
-    attributes.valence += parseFloat(song.valence) || 0
-    attributes.tempo += parseFloat(song.tempo) || 0
-  })
-  
-  Object.keys(attributes).forEach(key => {
-    attributes[key] = attributes[key] / artistSongs.length
-  })
+  const artistData = artistStatsData.find(data => data.Artist === artist);
+  if (!artistData) return null;
   
   return {
-    attributes,
-    songCount: artistSongs.length
+    attributes: {
+      danceability: parseFloat(artistData.danceability) || 0,
+      energy: parseFloat(artistData.energy) || 0,
+      speechiness: parseFloat(artistData.speechiness) || 0,
+      acoustics: parseFloat(artistData.acoustics) || 0,
+      instrumentalness: parseFloat(artistData.instrumentalness) || 0,
+      liveliness: parseFloat(artistData.liveliness) || 0,
+      valence: parseFloat(artistData.valence) || 0,
+      tempo: parseFloat(artistData.tempo) || 0
+    },
+    songCount: parseInt(artistData.songCount) || 0
   }
 }
 
@@ -108,7 +63,6 @@ const processData = (musicData) => {
   console.log('Processing music data...')
   const newDataByCountry = {}
   const genres = new Set()
-  const artists = new Set()
   const songs = new Set()
   const genresNew  = new Set() 
 
@@ -164,7 +118,6 @@ const processData = (musicData) => {
   console.log('Data processing complete:', {
     totalCountries: Object.keys(newDataByCountry).length,
     totalGenres: genres.size,
-    totalArtists: artists.size,
     totalSongs: songs.size
   })
 
@@ -173,7 +126,8 @@ const processData = (musicData) => {
     genres: Array.from(genres),
     artists: Array.from(artists),
     songs: Array.from(songs),
-    genresNew: Array.from(genresNew)
+    genresNew: Array.from(genresNew),
+    songs: Array.from(songs)
   }
 }
 
@@ -181,26 +135,43 @@ export const MusicDataProvider = ({ children }) => {
   const [musicData, setMusicData] = useState(null)
   const [processedData, setProcessedData] = useState(null)
   const [artists, setArtists] = useState([])
+  const [artistStatsData, setArtistStatsData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        console.log('Loading music data...')
-        const data = await d3.csv("https://dl.dropboxusercontent.com/scl/fi/g5ldnl5g5fai6o5twc587/cleaned_data.csv?rlkey=nlhzlwfwymp7ma7497xw8kqdh&st=xr4zrmns&dl=0")
+        console.log('Loading music and artist stats data...')
+        const [musicDataResponse, artistStatsResponse] = await Promise.all([
+          d3.csv("https://dl.dropboxusercontent.com/scl/fi/g5ldnl5g5fai6o5twc587/cleaned_data.csv?rlkey=nlhzlwfwymp7ma7497xw8kqdh&st=xr4zrmns&dl=0"),
+          d3.csv("https://dl.dropboxusercontent.com/scl/fi/kzxnapcgygmftw4lm93i9/artist_attributes_info.csv?rlkey=o4o2gd1vcoixf2r65xq366rnk&st=tpg05v30&dl=0")
+        ]);
+
         console.log('Music data loaded successfully:', {
-          totalRecords: data.length,
-          sampleRecord: data[0],
-          columns: Object.keys(data[0])
+          totalRecords: musicDataResponse.length,
+          sampleRecord: musicDataResponse[0],
+          columns: Object.keys(musicDataResponse[0])
         })
-        setMusicData(data)
-        const processed = processData(data)
+
+        console.log('Artist stats data loaded successfully:', {
+          totalArtists: artistStatsResponse.length,
+          sampleRecord: artistStatsResponse[0],
+          columns: Object.keys(artistStatsResponse[0])
+        })
+
+        setMusicData(musicDataResponse)
+        setArtistStatsData(artistStatsResponse)
+        const processed = processData(musicDataResponse)
         setProcessedData(processed)
-        const artistList = processArtistData(data)
+        
+        // Get artists from the precomputed stats data and sort them alphabetically
+        const artistList = artistStatsResponse
+          .map(data => data.Artist)
+          .sort((a, b) => a.localeCompare(b));
         setArtists(artistList)
       } catch (err) {
-        console.error('Error loading music data:', err)
+        console.error('Error loading data:', err)
         setError(err)
       } finally {
         setLoading(false)
@@ -214,7 +185,7 @@ export const MusicDataProvider = ({ children }) => {
     musicData,
     processedData,
     artists,
-    calculateArtistStats: (artist) => calculateArtistStats(musicData, artist),
+    calculateArtistStats: (artist) => calculateArtistStats(artistStatsData, artist),
     loading,
     error
   }

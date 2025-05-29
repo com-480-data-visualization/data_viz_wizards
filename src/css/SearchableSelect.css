@@ -230,4 +230,21 @@
   to {
     opacity: 1;
   }
+}
+
+.option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #2a2a2a;
+}
+
+.option.disabled:hover {
+  transform: none;
+  background: #2a2a2a;
+}
+
+.max-selections-note {
+  color: #888;
+  font-size: 0.9em;
+  font-style: italic;
 } 
