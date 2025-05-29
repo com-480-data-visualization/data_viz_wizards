@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import MapPlot from './components/MapPlot'
 import CountryStatistics from './components/CountryStatistics'
+import PropertySearch from './components/PropertySearch'
 import ArtistComparison from './components/ArtistComparison'
 import Navigation from './components/Navigation'
 import { MusicDataProvider } from './context/MusicDataContext'
@@ -40,6 +41,7 @@ function App() {
             <CountryStatistics selectedCountry={selectedCountry} />
           )}
           {currentView === 'property-search' && <PropertySearch />}
+
           {currentView === 'artist-comparison' 
           && <ArtistComparison />}
           {currentView === 'dataset-overview' && (

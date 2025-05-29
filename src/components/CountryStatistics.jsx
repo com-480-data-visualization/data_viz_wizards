@@ -3,7 +3,7 @@ import * as d3 from 'd3'
 import { useMusicData } from '../context/MusicDataContext'
 import '../css/CountryStatistics.css'
 
-const CountryStatistics = () => {
+const CountryStatistics = ({ selectedCountry: propSelectedCountry }) => {
   const { musicData, loading, error } = useMusicData()
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [countries, setCountries] = useState([])
@@ -69,15 +69,16 @@ const CountryStatistics = () => {
       
       setCountries(validCountries)
       
-      // Set default country (Spain if available, otherwise first country)
-      if (validCountries.length > 0) {
+      if (propSelectedCountry && validCountries.includes(propSelectedCountry)) {
+        setSelectedCountry(propSelectedCountry)
+      } else if (validCountries.length > 0) {
         const defaultCountry = validCountries.includes('Spain') 
           ? 'Spain' 
           : validCountries[0]
         setSelectedCountry(defaultCountry)
       }
     }
-  }, [musicData])
+  }, [musicData, propSelectedCountry])
 
   useEffect(() => {
     if (musicData && selectedCountry && globalThresholds) {
@@ -98,18 +99,14 @@ const CountryStatistics = () => {
   }, [countryStats])
   
   const calculateStats = (data, country, thresholds) => {
-    // Get total songs
     const totalSongs = data.length
     
-    // Genre distribution
     const genreCounts = {}
     data.forEach(song => {
-      // Make sure to capitalize first letter for consistency
       const genre = song.Genre ? song.Genre.charAt(0).toUpperCase() + song.Genre.slice(1).toLowerCase() : 'Unknown'
       genreCounts[genre] = (genreCounts[genre] || 0) + 1
     })
     
-    // Create genre percentage
     const genrePercentages = {}
     Object.entries(genreCounts).forEach(([genre, count]) => {
       genrePercentages[genre] = (count / totalSongs) * 100
@@ -131,13 +128,11 @@ const CountryStatistics = () => {
       let artistName = 'Unknown'
       if (song.Artist) {
         try {
-          // Attempt to parse the string representation of a list
           const artistList = JSON.parse(song.Artist.replace(/'/g, '"'))
           if (Array.isArray(artistList) && artistList.length > 0) {
-            artistName = artistList[0] // Take the first artist
+            artistName = artistList[0] 
           }
         } catch (e) {
-          // If parsing fails, use the raw string (fallback)
           artistName = song.Artist
         }
       }
@@ -162,7 +157,6 @@ const CountryStatistics = () => {
       .sort((a, b) => b.totalPopularity - a.totalPopularity)
       .slice(0, 5)
     
-    // Song distribution based on popularity
     const songPopularity = {}
     const songDetails = {}
     data.forEach(song => {
@@ -208,10 +202,9 @@ const CountryStatistics = () => {
       .sort((a, b) => b.totalPopularity - a.totalPopularity)
       .slice(0, 5)
 
-    // Calculate total country popularity score
     const totalCountryPopularity = Math.round(data.reduce((sum, song) => sum + (parseFloat(song.Popularity) || 0), 0))
     
-    // Tempo distribution using percentile thresholds
+    // Tempo distribution 
     const fastCount = data.filter(song => parseFloat(song.tempo) > thresholds.tempo.p67).length
     const mediumCount = data.filter(song => {
       const tempo = parseFloat(song.tempo)
@@ -224,7 +217,7 @@ const CountryStatistics = () => {
       { category: 'Slow', percentage: (slowCount / totalSongs) * 100 }
     ]
     
-    // Energy levels using percentile thresholds
+    // Energy levels 
     const highEnergyCount = data.filter(song => parseFloat(song.energy) > thresholds.energy.p67).length
     const mediumEnergyCount = data.filter(song => {
       const energy = parseFloat(song.energy)
@@ -237,7 +230,7 @@ const CountryStatistics = () => {
       { category: 'Low', percentage: (lowEnergyCount / totalSongs) * 100 }
     ]
     
-    // Danceability levels using percentile thresholds
+    // Danceability levels 
     const highDanceCount = data.filter(song => parseFloat(song.danceability) > thresholds.danceability.p67).length
     const mediumDanceCount = data.filter(song => {
       const danceability = parseFloat(song.danceability)
@@ -250,7 +243,7 @@ const CountryStatistics = () => {
       { category: 'Low', percentage: (lowDanceCount / totalSongs) * 100 }
     ]
     
-    // Valence (happiness) levels using percentile thresholds
+    // Valence (happiness) levels 
     const highValenceCount = data.filter(song => parseFloat(song.valence) > thresholds.valence.p67).length
     const mediumValenceCount = data.filter(song => {
       const valence = parseFloat(song.valence)
@@ -263,7 +256,7 @@ const CountryStatistics = () => {
       { category: 'Sad', percentage: (lowValenceCount / totalSongs) * 100 }
     ]
     
-    // Acoustics levels using percentile thresholds
+    // Acoustics levels
     const highAcousticsCount = data.filter(song => parseFloat(song.acoustics) > thresholds.acoustics.p67).length
     const mediumAcousticsCount = data.filter(song => {
       const acoustics = parseFloat(song.acoustics)
@@ -276,7 +269,7 @@ const CountryStatistics = () => {
       { category: 'Electronic', percentage: (lowAcousticsCount / totalSongs) * 100 }
     ]
     
-    // Liveliness levels using percentile thresholds
+    // Liveliness levels
     const highLivelinessCount = data.filter(song => parseFloat(song.liveliness) > thresholds.liveliness.p67).length
     const mediumLivelinessCount = data.filter(song => {
       const liveliness = parseFloat(song.liveliness)
@@ -323,9 +316,9 @@ const CountryStatistics = () => {
     const color = d3.scaleOrdinal()
       .domain(["Live", "Mixed", "Studio"])
       .range([
-        "#e22856", // Spotify Pink/Red (Live)
-        "#1DB954", // Spotify Green (Mixed)
-        "#9c27b0"  // Purple (Studio)
+        "#e22856",
+        "#1DB954", 
+        "#9c27b0"  
       ])
     
     const pie = d3.pie()
@@ -336,7 +329,6 @@ const CountryStatistics = () => {
       .innerRadius(radius * 0.5)
       .outerRadius(radius * 0.85)
     
-    // Create the pie chart
     chart.selectAll("path")
       .data(pie(countryStats.livelinessDistribution))
       .enter()
@@ -346,7 +338,6 @@ const CountryStatistics = () => {
       .attr("stroke", "#121212")
       .style("stroke-width", "3px")
     
-    // Add percentages
     chart.selectAll("text.percentage")
       .data(pie(countryStats.livelinessDistribution))
       .enter()
@@ -361,7 +352,6 @@ const CountryStatistics = () => {
       .style("fill", "white")
       .style("font-family", "'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif")
     
-    // Add legend at the bottom
     const legend = svg.append("g")
       .attr("transform", `translate(15, ${height - 70})`)
     
@@ -404,9 +394,9 @@ const CountryStatistics = () => {
     const color = d3.scaleOrdinal()
       .domain(["Fast", "Medium", "Slow"])
       .range([
-        "#e22856", // Spotify Pink/Red (Fast)
-        "#1DB954", // Spotify Green (Medium)
-        "#7c4dff"  // Spotify Purple (Slow)
+        "#e22856",
+        "#1DB954", 
+        "#7c4dff" 
       ])
     
     const pie = d3.pie()
@@ -417,7 +407,6 @@ const CountryStatistics = () => {
       .innerRadius(radius * 0.5)
       .outerRadius(radius * 0.85)
     
-    // Create the pie chart
     chart.selectAll("path")
       .data(pie(countryStats.tempoDistribution))
       .enter()
@@ -427,7 +416,6 @@ const CountryStatistics = () => {
       .attr("stroke", "#121212")
       .style("stroke-width", "3px")
     
-    // Add percentages
     chart.selectAll("text.percentage")
       .data(pie(countryStats.tempoDistribution))
       .enter()
@@ -442,7 +430,6 @@ const CountryStatistics = () => {
       .style("fill", "white")
       .style("font-family", "'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif")
     
-    // Add legend at the bottom
     const legend = svg.append("g")
       .attr("transform", `translate(15, ${height - 70})`)
     
@@ -485,9 +472,9 @@ const CountryStatistics = () => {
     const color = d3.scaleOrdinal()
       .domain(["High", "Medium", "Low"])
       .range([
-        "#ff6b35", // Spotify Orange (High Energy)
-        "#ffeb3b", // Spotify Yellow (Medium Energy)
-        "#00d4ff"  // Spotify Blue (Low Energy)
+        "#ff6b35",
+        "#ffeb3b",
+        "#00d4ff" 
       ])
     
     const pie = d3.pie()
@@ -498,7 +485,6 @@ const CountryStatistics = () => {
       .innerRadius(radius * 0.5)
       .outerRadius(radius * 0.85)
     
-    // Create the pie chart
     chart.selectAll("path")
       .data(pie(countryStats.energyDistribution))
       .enter()
@@ -508,7 +494,6 @@ const CountryStatistics = () => {
       .attr("stroke", "#121212")
       .style("stroke-width", "3px")
     
-    // Add percentages
     chart.selectAll("text.percentage")
       .data(pie(countryStats.energyDistribution))
       .enter()
@@ -523,7 +508,6 @@ const CountryStatistics = () => {
       .style("fill", "white")
       .style("font-family", "'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif")
     
-    // Add legend at the bottom
     const legend = svg.append("g")
       .attr("transform", `translate(15, ${height - 70})`)
     
@@ -566,9 +550,9 @@ const CountryStatistics = () => {
     const color = d3.scaleOrdinal()
       .domain(["High", "Medium", "Low"])
       .range([
-        "#e22856", // Spotify Pink/Red (High Danceability)
-        "#9c27b0", // Purple (Medium Danceability)
-        "#7c4dff"  // Light Purple (Low Danceability)
+        "#e22856",
+        "#9c27b0",
+        "#7c4dff" 
       ])
     
     const pie = d3.pie()
@@ -579,7 +563,6 @@ const CountryStatistics = () => {
       .innerRadius(radius * 0.5)
       .outerRadius(radius * 0.85)
     
-    // Create the pie chart
     chart.selectAll("path")
       .data(pie(countryStats.danceDistribution))
       .enter()
@@ -589,7 +572,6 @@ const CountryStatistics = () => {
       .attr("stroke", "#121212")
       .style("stroke-width", "3px")
     
-    // Add percentages
     chart.selectAll("text.percentage")
       .data(pie(countryStats.danceDistribution))
       .enter()
@@ -604,7 +586,6 @@ const CountryStatistics = () => {
       .style("fill", "white")
       .style("font-family", "'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif")
     
-    // Add legend at the bottom
     const legend = svg.append("g")
       .attr("transform", `translate(15, ${height - 70})`)
     
@@ -647,9 +628,9 @@ const CountryStatistics = () => {
     const color = d3.scaleOrdinal()
       .domain(["Happy", "Neutral", "Sad"])
       .range([
-        "#ffeb3b", // Bright Yellow (Happy)
-        "#1DB954", // Spotify Green (Neutral)
-        "#00d4ff"  // Blue (Sad)
+        "#ffeb3b",
+        "#1DB954",
+        "#00d4ff" 
       ])
     
     const pie = d3.pie()
@@ -660,7 +641,6 @@ const CountryStatistics = () => {
       .innerRadius(radius * 0.5)
       .outerRadius(radius * 0.85)
     
-    // Create the pie chart
     chart.selectAll("path")
       .data(pie(countryStats.valenceDistribution))
       .enter()
@@ -670,7 +650,6 @@ const CountryStatistics = () => {
       .attr("stroke", "#121212")
       .style("stroke-width", "3px")
     
-    // Add percentages
     chart.selectAll("text.percentage")
       .data(pie(countryStats.valenceDistribution))
       .enter()
@@ -682,10 +661,9 @@ const CountryStatistics = () => {
       .text(d => `${Math.round(d.data.percentage)}%`)
       .style("font-size", "14px")
       .style("font-weight", "bold")
-      .style("fill", d => d.data.category === "Happy" ? "#333" : "white") // Dark text for yellow
+      .style("fill", d => d.data.category === "Happy" ? "#333" : "white")
       .style("font-family", "'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif")
     
-    // Add legend at the bottom
     const legend = svg.append("g")
       .attr("transform", `translate(15, ${height - 70})`)
     
@@ -728,9 +706,9 @@ const CountryStatistics = () => {
     const color = d3.scaleOrdinal()
       .domain(["Acoustic", "Mixed", "Electronic"])
       .range([
-        "#4caf50", // Green (Natural/Acoustic)
-        "#ff9800", // Orange (Mixed)
-        "#9c27b0"  // Purple (Electronic/Synthetic)
+        "#4caf50",
+        "#ff9800",
+        "#9c27b0" 
       ])
     
     const pie = d3.pie()
@@ -741,7 +719,6 @@ const CountryStatistics = () => {
       .innerRadius(radius * 0.5)
       .outerRadius(radius * 0.85)
     
-    // Create the pie chart
     chart.selectAll("path")
       .data(pie(countryStats.acousticsDistribution))
       .enter()
@@ -751,7 +728,6 @@ const CountryStatistics = () => {
       .attr("stroke", "#121212")
       .style("stroke-width", "3px")
     
-    // Add percentages
     chart.selectAll("text.percentage")
       .data(pie(countryStats.acousticsDistribution))
       .enter()
@@ -766,7 +742,6 @@ const CountryStatistics = () => {
       .style("fill", "white")
       .style("font-family", "'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif")
     
-    // Add legend at the bottom
     const legend = svg.append("g")
       .attr("transform", `translate(15, ${height - 70})`)
     
@@ -799,7 +774,7 @@ const CountryStatistics = () => {
       <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Music Demographics Dashboard</h1>
-          <p className="dashboard-subtitle">🌍 Pick a country and dive into its musical DNA! 🎵 Will you find your favorite song or artist?</p>
+          <p className="dashboard-subtitle">🌍 Pick a country and dive into its musical DNA! Will you find your favorite song or artist? 🎵</p>
         </div>
       </div>
       
