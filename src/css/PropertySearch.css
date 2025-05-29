@@ -48,7 +48,28 @@
   margin-bottom: 25px;
 }
 
-.filter-section h3 {
+.filter-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.filter-section-header .range-label-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-section-header h3 {
+  color: #1DB954;
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+/* Remove the margin from regular filter-section h3 since we're using the header version */
+.filter-section h3:not(.filter-section-header h3) {
   color: #1DB954;
   margin-bottom: 15px;
   font-size: 1.3rem;
@@ -269,10 +290,18 @@
   min-width: 0;
 }
 
+.multi-select-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
 .multi-select-group label {
   color: #b3b3b3;
   font-weight: 500;
   font-size: 0.9rem;
+  margin: 0;
 }
 
 /* Override SearchableSelect styles to match our theme */

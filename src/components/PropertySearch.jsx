@@ -24,6 +24,7 @@ const PropertySearch = () => {
   const [hasSearched, setHasSearched] = useState(false)
   const [genres, setGenres] = useState([])
   const [artists, setArtists] = useState([])
+  const [showGenreArtistTooltip, setShowGenreArtistTooltip] = useState(false)
 
   useEffect(() => {
     if (musicData) {
@@ -208,7 +209,26 @@ const PropertySearch = () => {
         </div>
 
         <div className="filter-section">
-          <h3>🎭 Genre & Artist</h3>
+          <div className="filter-section-header">
+            <div className="range-label-container">
+              <h3>🎭 Genre & Artist</h3>
+              <div className="info-button-container">
+                <button 
+                  className="info-button"
+                  onMouseEnter={() => setShowGenreArtistTooltip(true)}
+                  onMouseLeave={() => setShowGenreArtistTooltip(false)}
+                  onClick={(e) => e.preventDefault()}
+                >
+                  ℹ️
+                </button>
+                {showGenreArtistTooltip && (
+                  <div className="info-tooltip">
+                    Leave empty to explore all genres and artists. Select specific ones to focus your recommendations.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
           <div className="multi-select-inputs">
             <div className="multi-select-group">
               <label>Genres:</label>
