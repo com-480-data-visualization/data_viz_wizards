@@ -5,6 +5,7 @@ import PropertySearch from './components/PropertySearch'
 import ArtistComparison from './components/ArtistComparison'
 import Navigation from './components/Navigation'
 import { MusicDataProvider } from './context/MusicDataContext'
+import DatasetOverview from './components/DatasetOverview'
 import './App.css'
 
 function App() {
@@ -40,7 +41,12 @@ function App() {
             <CountryStatistics selectedCountry={selectedCountry} />
           )}
           {currentView === 'property-search' && <PropertySearch />}
-          {currentView === 'artist-comparison' && <ArtistComparison />}
+
+          {currentView === 'artist-comparison' 
+          && <ArtistComparison />}
+          {currentView === 'dataset-overview' && (
+          <DatasetOverview />
+        )}
         </div>
       </div>
     </MusicDataProvider>

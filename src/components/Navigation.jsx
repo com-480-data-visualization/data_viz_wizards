@@ -27,6 +27,12 @@ const Navigation = ({ currentView, setCurrentView }) => {
       >
         Artist Comparison
       </button>
+      <button
+        className={currentView === 'dataset-overview' ? 'active' : ''}
+        onClick={() => setCurrentView('dataset-overview')}
+      >
+        Dataset
+      </button>
     </nav>
   )
 }
