@@ -39,6 +39,7 @@ function App() {
           {currentView === 'country-stats' && (
             <CountryStatistics selectedCountry={selectedCountry} />
           )}
+          {currentView === 'property-search' && <PropertySearch />}
           {currentView === 'artist-comparison' 
           && <ArtistComparison />}
           {currentView === 'dataset-overview' && (
