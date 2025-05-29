@@ -16,6 +16,8 @@ const titleCase = str =>
     .split(' ')
     .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
     .join(' ')
+
+  
 const parseArtistString = (artistStr) => {
   try {
     // Remove the outer square brackets and split by comma
@@ -65,6 +67,7 @@ const processData = (musicData) => {
   const genres = new Set()
   const songs = new Set()
   const genresNew  = new Set() 
+  const artists = new Set()
 
   musicData.forEach((row, index) => {
     if (index % 10000 === 0) {
