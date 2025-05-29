@@ -24,6 +24,7 @@ const processData = (musicData) => {
   const genres = new Set()
   const artists = new Set()
   const songs = new Set()
+  const genresNew  = new Set() 
 
   musicData.forEach((row, index) => {
     if (index % 10000 === 0) {
@@ -31,15 +32,17 @@ const processData = (musicData) => {
     }
     const raw = row.Artist.replace(/[\[\]']+/g, '')
     const country = row.Country.trim()
-    const genre = row.Genre
+    const genre = titleCase(row.Genre)
     const artistList = raw
       .split(',')
       .map(a => titleCase(a.trim()))
       .filter(a => a !== '')
     artistList.forEach(a => artists.add(a))
-    const song = row.Title
+    const song = titleCase(row.Title)
+    const genreNew = titleCase(row.Genre_new || '')
     genres.add(genre)
     songs.add(song)
+    genresNew.add(genreNew)
 
     if (!newDataByCountry[country]) {
       newDataByCountry[country] = {
@@ -53,6 +56,7 @@ const processData = (musicData) => {
       title: song,
       artists: artistList,
       genre: genre,
+      genre_new: genreNew,
       happiness: parseFloat(row.Happiness),
       popularity: parseFloat(row.Popularity),
       danceability: parseFloat(row.danceability),
@@ -82,7 +86,8 @@ const processData = (musicData) => {
     dataByCountry: newDataByCountry,
     genres: Array.from(genres),
     artists: Array.from(artists),
-    songs: Array.from(songs)
+    songs: Array.from(songs),
+    genresNew: Array.from(genresNew)
   }
 }
 

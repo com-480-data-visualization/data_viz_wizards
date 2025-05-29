@@ -4,6 +4,7 @@ import CountryStatistics from './components/CountryStatistics'
 import ArtistComparison from './components/ArtistComparison'
 import Navigation from './components/Navigation'
 import { MusicDataProvider } from './context/MusicDataContext'
+import DatasetOverview from './components/DatasetOverview'
 import './App.css'
 
 function App() {
@@ -38,7 +39,11 @@ function App() {
           {currentView === 'country-stats' && (
             <CountryStatistics selectedCountry={selectedCountry} />
           )}
-          {currentView === 'artist-comparison' && <ArtistComparison />}
+          {currentView === 'artist-comparison' 
+          && <ArtistComparison />}
+          {currentView === 'dataset-overview' && (
+          <DatasetOverview />
+        )}
         </div>
       </div>
     </MusicDataProvider>
