@@ -13,39 +13,46 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
   //const [countryData, setCountryData] = useState([]);
   const [basePolygons, setBasePolygons] = useState([]);
   const [coloredPolygons, setColoredPolygons] = useState([]);
+  const [showOverlay, setShowOverlay] = useState(true);
   const globeRef = useRef();
 
   const countryNameMapping = {
-    "United States of America": "USA",
-    "United States": "USA",
-    "United Kingdom": "UK",
-    "Great Britain": "UK",
-    "England": "UK",
-    "Scotland": "UK",
-    "Wales": "UK",
-    "Northern Ireland": "UK"
+    "GBR": "UK",
+    "USA": "USA",
   }
 
-  const typeOptions = useMemo(() => [
-    { value: 'genre', label: 'Genre' },
-    { value: 'artist', label: 'Artist' },
-    { value: 'song', label: 'Song' }
-  ], [])
+  const titleCase = (str) =>
+    str
+      .split(' ')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ')
+  const typeOptions = useMemo(() => {
+    const arr = ['genre', 'artist', 'song']
+    return arr
+      .map(v => ({ value: v, label: titleCase(v) }))
+      .sort((a, b) => a.label.localeCompare(b.label))
+  }, [])
 
   const valueOptions = useMemo(() => {
     if (!processedData) return []
-    const raw =
+    let raw =
       filterType === 'genre' ? processedData.genres :
         filterType === 'artist' ? processedData.artists :
           filterType === 'song' ? processedData.songs :
             []
+
+    raw = Array.from(new Set(raw))
+    raw.sort((a, b) => a.localeCompare(b))
+
     return [
       { value: 'all', label: 'All' },
       ...raw.map(opt => ({
         value: opt,
-        label: opt.length > 40
-          ? opt.slice(0, 40) + '…'
-          : opt
+        label: titleCase(
+          opt.length > 40
+            ? opt.slice(0, 40) + '…'
+            : opt
+        )
       }))
     ]
   }, [processedData, filterType])
@@ -80,7 +87,7 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
       if (filterValue !== 'all') {
         songs = songs.filter(s => {
           if (filterType === 'genre') return s.genre === filterValue;
-          if (filterType === 'artist') return s.artist === filterValue;
+          if (filterType === 'artist') return s.artists.includes(filterValue);
           if (filterType === 'song') return s.title === filterValue;
         });
       }
@@ -94,7 +101,16 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
 
     const updated = basePolygons.map(poly => {
       const name = poly.properties.NAME || poly.properties.ADMIN;
-      const pop = countryToPopularity[name] || 0;
+
+      // ISO-A3 code for USA
+      const iso3 = poly.properties.ADM0_A3;
+
+      const key = countryNameMapping[name]
+           || countryNameMapping[iso3]
+           || name;
+
+      const pop = countryToPopularity[key] || 0;
+
       return {
         ...poly,
         properties: {
@@ -144,9 +160,6 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
     }
   };
 
-  const capitalize = (str) =>
-    str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
-
   // Color legend gradient
   const legendGradient = `linear-gradient(to right, 
   ${interpolateViridis(0)}, 
@@ -178,7 +191,7 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
     })
   }
 
-  if (loading) return <div>Loading...</div>
+  if (loading) return <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>Loading Data...</div>
   if (error) return <div>Error loading data: {error.message}</div>
 
   return (
@@ -191,13 +204,77 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
         overflow: 'hidden'
       }}
     >
+
+      <button
+        onClick={() => setShowOverlay(true)}
+        style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          zIndex: 12,
+          background: 'rgba(0,0,0,0.6)',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '50%',
+          width: '32px',
+          height: '32px',
+          cursor: 'pointer',
+          fontSize: '1.2rem'
+        }}
+      >
+        ℹ️
+      </button>
+      {showOverlay && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.75)',
+            zIndex: 11,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            color: '#fff',
+            textAlign: 'center',
+            padding: '20px'
+          }}
+        >
+          <div style={{ maxWidth: '600px', marginBottom: '20px', fontSize: '1.2rem' }}>
+            Welcome to Spotify in Data!<br />
+            Music plays an important role in most peoples lives. It motivates, helps in difficult times and
+            makes the best moments even more beautiful.
+            This project analyzes Spotify Chart Data to
+            dive deep into the world of music and discovers how the popularity of genres, songs
+            and artists as well as music attributes differ between countries. Start discovering the popularity of
+            your favorite genres, artists and songs across the world by using the filters below. Interact with the globe to explore
+            the data and whenever you are ready, click on a country to see the statistics for that country.
+            To compare your favorite artists, click on the "Artist Comparison" button in the navigation bar.
+          </div>
+          <button
+            onClick={() => setShowOverlay(false)}
+            style={{
+              padding: '10px 20px',
+              fontSize: '1rem',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              background: '#1ED760',
+              color: '#fff'
+            }}
+          >
+            Explore the world of music
+          </button>
+        </div>
+      )}
       {/* Title */}
       <h1
         style={{
           position: 'absolute',
-          top: '20px',
+          top: '5px',
           left: '50%',
           transform: 'translateX(-50%)',
+          whiteSpace: 'nowrap',
           zIndex: 10,
           fontSize: '2rem',
           color: '#fff',
@@ -225,11 +302,11 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
           boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)'
         }}
       >
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '1rem' }}>
+        <h2 style={{ fontSize: '1.4rem', margin: '0 0 0.75rem' }}>
           {title}
         </h2>
 
-        <h3 style={{ marginBottom: '0.5rem' }}>Filter Options</h3>
+        
 
         {/* Filter by type */}
         <div className="filter-row" style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
@@ -289,7 +366,7 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
             polygonsTransitionDuration={300}
             width={window.innerWidth}
             height={window.innerHeight}
-            key={JSON.stringify(coloredPolygons)}
+          //key={JSON.stringify(coloredPolygons)}
           />
         )}
       </div>

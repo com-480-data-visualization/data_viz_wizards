@@ -12,6 +12,12 @@ export const useMusicData = () => {
   return context
 }
 
+const titleCase = str =>
+  str
+    .split(' ')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ')
+
 const processData = (musicData) => {
   console.log('Processing music data...')
   const newDataByCountry = {}
@@ -23,13 +29,16 @@ const processData = (musicData) => {
     if (index % 10000 === 0) {
       console.log(`Processing row ${index} of ${musicData.length}...`)
     }
+    const raw = row.Artist.replace(/[\[\]']+/g, '')
     const country = row.Country.trim()
     const genre = row.Genre
-    const artist = row.Artist
+    const artistList = raw
+      .split(',')
+      .map(a => titleCase(a.trim()))
+      .filter(a => a !== '')
+    artistList.forEach(a => artists.add(a))
     const song = row.Title
-
     genres.add(genre)
-    artists.add(artist)
     songs.add(song)
 
     if (!newDataByCountry[country]) {
@@ -42,7 +51,7 @@ const processData = (musicData) => {
 
     newDataByCountry[country].songs.push({
       title: song,
-      artist: artist,
+      artists: artistList,
       genre: genre,
       happiness: parseFloat(row.Happiness),
       popularity: parseFloat(row.Popularity),
