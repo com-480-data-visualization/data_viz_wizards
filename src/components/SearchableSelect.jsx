@@ -8,17 +8,25 @@ const SearchableSelect = ({
   placeholder = 'Search...',
   label = 'Select items',
   multiple = true,
-  maxSelections = null
+  maxSelections = null,
+  defaultValues = []
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [removingTag, setRemovingTag] = useState(null)
   const dropdownRef = useRef(null)
 
+  // Initialize with default values if no selected values are provided
+  useEffect(() => {
+    if (selectedValues.length === 0 && defaultValues.length > 0) {
+      onChange(defaultValues)
+    }
+  }, [selectedValues, defaultValues, onChange])
+
   // Filter options based on search term
-  const filteredOptions = options.filter(option =>
-    option.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredOptions = (options || [])
+    .filter(option => option && typeof option === 'string') // Filter out undefined/null/non-string values
+    .filter(option => option.toLowerCase().includes(searchTerm.toLowerCase()))
 
   // Handle click outside to close dropdown
   useEffect(() => {

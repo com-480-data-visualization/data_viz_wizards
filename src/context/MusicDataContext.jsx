@@ -46,6 +46,27 @@ const calculateArtistStats = (artistStatsData, artist) => {
   const artistData = artistStatsData.find(data => data.Artist === artist);
   if (!artistData) return null;
   
+  // Parse the popu_max_list string to an actual array
+  let popuMaxList = [];
+  if (artistData.popu_max_list) {
+    try {
+      // Remove any surrounding whitespace and parse as JSON
+      const cleanString = artistData.popu_max_list.trim();
+      if (cleanString.startsWith('[') && cleanString.endsWith(']')) {
+        popuMaxList = JSON.parse(cleanString);
+      } else {
+        // If it's just a single number without brackets, wrap it in an array
+        const num = parseInt(cleanString);
+        if (!isNaN(num)) {
+          popuMaxList = [num];
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing popu_max_list for artist', artist, ':', artistData.popu_max_list, error);
+      popuMaxList = [];
+    }
+  }
+  
   return {
     attributes: {
       danceability: parseFloat(artistData.danceability) || 0,
@@ -57,7 +78,11 @@ const calculateArtistStats = (artistStatsData, artist) => {
       valence: parseFloat(artistData.valence) || 0,
       tempo: parseFloat(artistData.tempo) || 0
     },
-    songCount: parseInt(artistData.songCount) || 0
+    songCount: parseInt(artistData.songCount) || 0,
+    trackCount: parseInt(artistData.track_count) || 0,
+    top50Count: parseInt(artistData.top50_count) || 0,
+    top10Count: parseInt(artistData.top10_count) || 0,
+    popuMaxList: popuMaxList,
   }
 }
 
@@ -148,7 +173,7 @@ export const MusicDataProvider = ({ children }) => {
         console.log('Loading music and artist stats data...')
         const [musicDataResponse, artistStatsResponse] = await Promise.all([
           d3.csv("https://dl.dropboxusercontent.com/scl/fi/g5ldnl5g5fai6o5twc587/cleaned_data.csv?rlkey=nlhzlwfwymp7ma7497xw8kqdh&st=xr4zrmns&dl=0"),
-          d3.csv("https://dl.dropboxusercontent.com/scl/fi/kzxnapcgygmftw4lm93i9/artist_attributes_info.csv?rlkey=o4o2gd1vcoixf2r65xq366rnk&st=tpg05v30&dl=0")
+          d3.csv("https://dl.dropboxusercontent.com/scl/fi/hu15n5a40o698hx8dg7mq/artist_attributes_info_joined.csv?rlkey=5cpmwhrc5e5y05rncvnjnessh&st=lshqavpo&dl=0")
         ]);
 
         console.log('Music data loaded successfully:', {

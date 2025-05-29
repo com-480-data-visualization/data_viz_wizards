@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { useMusicData } from '../context/MusicDataContext'
 import SearchableSelect from './SearchableSelect'
+import RankJitterPlot from './RankJitterPlot'
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, ResponsiveContainer, Tooltip } from 'recharts'
 import '../css/ArtistComparison.css'
 
 const ArtistComparison = () => {
   const svgRef = useRef(null)
   const { artists, calculateArtistStats, loading, error } = useMusicData()
-  const [selectedArtists, setSelectedArtists] = useState([])
+  const [selectedArtists, setSelectedArtists] = useState(["Drake", "Kendrick Lamar", "Lana Del Rey", "A$AP Rocky"])
   const [artistStats, setArtistStats] = useState({})
   const [tooltipContent, setTooltipContent] = useState(null)
   const [hoveredAttribute, setHoveredAttribute] = useState(null)
@@ -143,6 +144,7 @@ const ArtistComparison = () => {
           label="Select artists to compare"
           maxSelections={4}
           multiple={true}
+          defaultValues={["Drake", "Kendrick Lamar", "Lana Del Rey", "A$AP Rocky"]}
         />
       </div>
 
@@ -335,6 +337,11 @@ const ArtistComparison = () => {
               Compare audio features across selected artists using interactive radar visualization
             </div>
           </div>
+
+          <RankJitterPlot 
+            selectedArtists={selectedArtists}
+            artistStats={artistStats}
+          />
         </div>
       )}
 
