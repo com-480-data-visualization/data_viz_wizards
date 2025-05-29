@@ -8,6 +8,7 @@ const CountryStatistics = () => {
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [countries, setCountries] = useState([])
   const [countryStats, setCountryStats] = useState(null)
+  const [globalThresholds, setGlobalThresholds] = useState(null)
   
   const genreChartRef = useRef(null)
   const tempoChartRef = useRef(null)
@@ -16,8 +17,42 @@ const CountryStatistics = () => {
   const valenceChartRef = useRef(null)
   const acousticsChartRef = useRef(null)
 
+
+  // Calculate global percentile thresholds from entire dataset
+  const calculateGlobalThresholds = (data) => {
+    const calculatePercentiles = (values, p33, p67) => {
+      const sorted = values.filter(v => !isNaN(v)).sort((a, b) => a - b)
+      const len = sorted.length
+      return {
+        p33: sorted[Math.floor(len * p33)],
+        p67: sorted[Math.floor(len * p67)]
+      }
+    }
+
+    // Extract values for each feature
+    const tempoValues = data.map(song => parseFloat(song.tempo)).filter(v => !isNaN(v))
+    const energyValues = data.map(song => parseFloat(song.energy)).filter(v => !isNaN(v))
+    const danceabilityValues = data.map(song => parseFloat(song.danceability)).filter(v => !isNaN(v))
+    const valenceValues = data.map(song => parseFloat(song.valence)).filter(v => !isNaN(v))
+    const acousticsValues = data.map(song => parseFloat(song.acoustics)).filter(v => !isNaN(v))
+    const livelinessValues = data.map(song => parseFloat(song.liveliness)).filter(v => !isNaN(v))
+
+    return {
+      tempo: calculatePercentiles(tempoValues, 0.33, 0.67),
+      energy: calculatePercentiles(energyValues, 0.33, 0.67),
+      danceability: calculatePercentiles(danceabilityValues, 0.33, 0.67),
+      valence: calculatePercentiles(valenceValues, 0.33, 0.67),
+      acoustics: calculatePercentiles(acousticsValues, 0.33, 0.67),
+      liveliness: calculatePercentiles(livelinessValues, 0.33, 0.67)
+    }
+  }
+
   useEffect(() => {
     if (musicData) {
+      // Calculate global thresholds first
+      const thresholds = calculateGlobalThresholds(musicData)
+      setGlobalThresholds(thresholds)
+
       // Get unique countries with at least 30 songs
       const countryCounts = {}
       musicData.forEach(song => {
@@ -45,15 +80,15 @@ const CountryStatistics = () => {
   }, [musicData])
 
   useEffect(() => {
-    if (musicData && selectedCountry) {
+    if (musicData && selectedCountry && globalThresholds) {
       const countryData = musicData.filter(d => d.Country?.trim() === selectedCountry)
-      setCountryStats(calculateStats(countryData, selectedCountry))
+      setCountryStats(calculateStats(countryData, selectedCountry, globalThresholds))
     }
-  }, [musicData, selectedCountry])
+  }, [musicData, selectedCountry, globalThresholds])
   
   useEffect(() => {
     if (countryStats) {
-      createGenreChart()
+      createLivelinessChart()
       createTempoChart()
       createEnergyChart()
       createDanceabilityChart()
@@ -62,7 +97,7 @@ const CountryStatistics = () => {
     }
   }, [countryStats])
   
-  const calculateStats = (data, country) => {
+  const calculateStats = (data, country, thresholds) => {
     // Get total songs
     const totalSongs = data.length
     
@@ -89,108 +124,187 @@ const CountryStatistics = () => {
         percentage
       }))
     
-    // Artist distribution
-    const artistCounts = {}
+    // Artist distribution based on popularity
+    const artistPopularity = {}
+    const artistSongCounts = {}
     data.forEach(song => {
-      let artistName = 'Unknown';
+      let artistName = 'Unknown'
       if (song.Artist) {
         try {
           // Attempt to parse the string representation of a list
-          const artistList = JSON.parse(song.Artist.replace(/'/g, '"'));
+          const artistList = JSON.parse(song.Artist.replace(/'/g, '"'))
           if (Array.isArray(artistList) && artistList.length > 0) {
-            artistName = artistList[0]; // Take the first artist
+            artistName = artistList[0] // Take the first artist
           }
         } catch (e) {
           // If parsing fails, use the raw string (fallback)
-          artistName = song.Artist;
+          artistName = song.Artist
         }
       }
-      artistCounts[artistName] = (artistCounts[artistName] || 0) + 1
+      
+      const popularity = parseFloat(song.Popularity) || 0
+      if (!artistPopularity[artistName]) {
+        artistPopularity[artistName] = 0
+        artistSongCounts[artistName] = 0
+      }
+      artistPopularity[artistName] += popularity
+      artistSongCounts[artistName] += 1
     })
     
-    // Get top artists
-    const topArtists = Object.entries(artistCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([artist, count]) => ({
+    // Calculate total popularity for each artist and get top artists (sorted by total popularity)
+    const topArtists = Object.entries(artistPopularity)
+      .map(([artist, totalPopularity]) => ({
         artist,
-        count,
-        percentage: (count / totalSongs) * 100
+        totalPopularity: Math.round(totalPopularity),
+        avgPopularity: totalPopularity / artistSongCounts[artist],
+        songCount: artistSongCounts[artist]
       }))
+      .sort((a, b) => b.totalPopularity - a.totalPopularity)
+      .slice(0, 5)
+    
+    // Song distribution based on popularity
+    const songPopularity = {}
+    const songDetails = {}
+    data.forEach(song => {
+      const songTitle = song.Title || 'Unknown'
+      const songUri = song.Uri || ''
+      let artistName = 'Unknown'
       
-    // Tempo distribution
-    const fastCount = data.filter(song => parseFloat(song.tempo) > 120).length
-    const mediumCount = data.filter(song => parseFloat(song.tempo) >= 80 && parseFloat(song.tempo) <= 120).length
-    const slowCount = data.filter(song => parseFloat(song.tempo) < 80).length
+      if (song.Artist) {
+        try {
+          const artistList = JSON.parse(song.Artist.replace(/'/g, '"'))
+          if (Array.isArray(artistList) && artistList.length > 0) {
+            artistName = artistList[0]
+          }
+        } catch (e) {
+          artistName = song.Artist
+        }
+      }
+      
+      const popularity = parseFloat(song.Popularity) || 0
+      const songKey = `${songTitle} - ${artistName}`
+      
+      if (!songPopularity[songKey]) {
+        songPopularity[songKey] = 0
+        songDetails[songKey] = {
+          title: songTitle,
+          artist: artistName,
+          uri: songUri,
+          count: 0
+        }
+      }
+      songPopularity[songKey] += popularity
+      songDetails[songKey].count += 1
+    })
+    
+    const topSongs = Object.entries(songPopularity)
+      .map(([songKey, totalPopularity]) => ({
+        title: songDetails[songKey].title,
+        artist: songDetails[songKey].artist,
+        uri: songDetails[songKey].uri,
+        totalPopularity: Math.round(totalPopularity),
+        count: songDetails[songKey].count
+      }))
+      .sort((a, b) => b.totalPopularity - a.totalPopularity)
+      .slice(0, 5)
+
+    // Calculate total country popularity score
+    const totalCountryPopularity = Math.round(data.reduce((sum, song) => sum + (parseFloat(song.Popularity) || 0), 0))
+    
+    // Tempo distribution using percentile thresholds
+    const fastCount = data.filter(song => parseFloat(song.tempo) > thresholds.tempo.p67).length
+    const mediumCount = data.filter(song => {
+      const tempo = parseFloat(song.tempo)
+      return tempo >= thresholds.tempo.p33 && tempo <= thresholds.tempo.p67
+    }).length
+    const slowCount = data.filter(song => parseFloat(song.tempo) < thresholds.tempo.p33).length
     const tempoDistribution = [
       { category: 'Fast', percentage: (fastCount / totalSongs) * 100 },
       { category: 'Medium', percentage: (mediumCount / totalSongs) * 100 },
       { category: 'Slow', percentage: (slowCount / totalSongs) * 100 }
     ]
     
-    // Energy levels
-    const highEnergyCount = data.filter(song => parseFloat(song.energy) > 0.66).length
-    const mediumEnergyCount = data.filter(song => parseFloat(song.energy) >= 0.33 && parseFloat(song.energy) <= 0.66).length
-    const lowEnergyCount = data.filter(song => parseFloat(song.energy) < 0.33).length
+    // Energy levels using percentile thresholds
+    const highEnergyCount = data.filter(song => parseFloat(song.energy) > thresholds.energy.p67).length
+    const mediumEnergyCount = data.filter(song => {
+      const energy = parseFloat(song.energy)
+      return energy >= thresholds.energy.p33 && energy <= thresholds.energy.p67
+    }).length
+    const lowEnergyCount = data.filter(song => parseFloat(song.energy) < thresholds.energy.p33).length
     const energyDistribution = [
       { category: 'High', percentage: (highEnergyCount / totalSongs) * 100 },
       { category: 'Medium', percentage: (mediumEnergyCount / totalSongs) * 100 },
       { category: 'Low', percentage: (lowEnergyCount / totalSongs) * 100 }
     ]
     
-    // Danceability levels
-    const highDanceCount = data.filter(song => parseFloat(song.danceability) > 0.66).length
-    const mediumDanceCount = data.filter(song => parseFloat(song.danceability) >= 0.33 && parseFloat(song.danceability) <= 0.66).length
-    const lowDanceCount = data.filter(song => parseFloat(song.danceability) < 0.33).length
+    // Danceability levels using percentile thresholds
+    const highDanceCount = data.filter(song => parseFloat(song.danceability) > thresholds.danceability.p67).length
+    const mediumDanceCount = data.filter(song => {
+      const danceability = parseFloat(song.danceability)
+      return danceability >= thresholds.danceability.p33 && danceability <= thresholds.danceability.p67
+    }).length
+    const lowDanceCount = data.filter(song => parseFloat(song.danceability) < thresholds.danceability.p33).length
     const danceDistribution = [
       { category: 'High', percentage: (highDanceCount / totalSongs) * 100 },
       { category: 'Medium', percentage: (mediumDanceCount / totalSongs) * 100 },
       { category: 'Low', percentage: (lowDanceCount / totalSongs) * 100 }
     ]
     
-    // Valence (happiness) levels
-    const highValenceCount = data.filter(song => parseFloat(song.valence) > 0.66).length
-    const mediumValenceCount = data.filter(song => parseFloat(song.valence) >= 0.33 && parseFloat(song.valence) <= 0.66).length
-    const lowValenceCount = data.filter(song => parseFloat(song.valence) < 0.33).length
+    // Valence (happiness) levels using percentile thresholds
+    const highValenceCount = data.filter(song => parseFloat(song.valence) > thresholds.valence.p67).length
+    const mediumValenceCount = data.filter(song => {
+      const valence = parseFloat(song.valence)
+      return valence >= thresholds.valence.p33 && valence <= thresholds.valence.p67
+    }).length
+    const lowValenceCount = data.filter(song => parseFloat(song.valence) < thresholds.valence.p33).length
     const valenceDistribution = [
       { category: 'Happy', percentage: (highValenceCount / totalSongs) * 100 },
       { category: 'Neutral', percentage: (mediumValenceCount / totalSongs) * 100 },
       { category: 'Sad', percentage: (lowValenceCount / totalSongs) * 100 }
     ]
     
-    // Acoustics levels
-    const highAcousticsCount = data.filter(song => parseFloat(song.acoustics) > 0.66).length
-    const mediumAcousticsCount = data.filter(song => parseFloat(song.acoustics) >= 0.33 && parseFloat(song.acoustics) <= 0.66).length
-    const lowAcousticsCount = data.filter(song => parseFloat(song.acoustics) < 0.33).length
+    // Acoustics levels using percentile thresholds
+    const highAcousticsCount = data.filter(song => parseFloat(song.acoustics) > thresholds.acoustics.p67).length
+    const mediumAcousticsCount = data.filter(song => {
+      const acoustics = parseFloat(song.acoustics)
+      return acoustics >= thresholds.acoustics.p33 && acoustics <= thresholds.acoustics.p67
+    }).length
+    const lowAcousticsCount = data.filter(song => parseFloat(song.acoustics) < thresholds.acoustics.p33).length
     const acousticsDistribution = [
       { category: 'Acoustic', percentage: (highAcousticsCount / totalSongs) * 100 },
       { category: 'Mixed', percentage: (mediumAcousticsCount / totalSongs) * 100 },
       { category: 'Electronic', percentage: (lowAcousticsCount / totalSongs) * 100 }
     ]
     
-    // Average values for audio features
-    const avgFeatures = {}
-    const features = ['energy', 'danceability', 'valence', 'acoustics', 'speechiness', 'instrumentalness', 'tempo']
-    
-    features.forEach(feature => {
-      avgFeatures[feature] = data.reduce((sum, song) => sum + parseFloat(song[feature] || 0), 0) / totalSongs
-    })
+    // Liveliness levels using percentile thresholds
+    const highLivelinessCount = data.filter(song => parseFloat(song.liveliness) > thresholds.liveliness.p67).length
+    const mediumLivelinessCount = data.filter(song => {
+      const liveliness = parseFloat(song.liveliness)
+      return liveliness >= thresholds.liveliness.p33 && liveliness <= thresholds.liveliness.p67
+    }).length
+    const lowLivelinessCount = data.filter(song => parseFloat(song.liveliness) < thresholds.liveliness.p33).length
+    const livelinessDistribution = [
+      { category: 'Live', percentage: (highLivelinessCount / totalSongs) * 100 },
+      { category: 'Mixed', percentage: (mediumLivelinessCount / totalSongs) * 100 },
+      { category: 'Studio', percentage: (lowLivelinessCount / totalSongs) * 100 }
+    ]
     
     return {
-      country,
       totalSongs,
       topGenres,
       topArtists,
+      topSongs,
+      totalCountryPopularity,
       tempoDistribution,
       energyDistribution,
       danceDistribution,
       valenceDistribution,
       acousticsDistribution,
-      avgFeatures
+      livelinessDistribution
     }
   }
-  
-  const createGenreChart = () => {
+
+  const createLivelinessChart = () => {
     if (!genreChartRef.current) return
     
     const svg = d3.select(genreChartRef.current)
@@ -200,61 +314,41 @@ const CountryStatistics = () => {
     const height = 300
     const radius = Math.min(width, height - 80) / 2
     
-    if (countryStats.topGenres.length === 0) {
-      svg.attr("width", width)
-         .attr("height", height)
-         .append("text")
-         .attr("x", width / 2)
-         .attr("y", height / 2)
-         .attr("text-anchor", "middle")
-         .text("No genre data available")
-         .style("fill", "#FFFFFF")
-      return
-    }
-
     const chart = svg
       .attr("width", width)
       .attr("height", height)
       .append("g")
       .attr("transform", `translate(${width / 2}, ${height / 2 - 30})`)
-
-    // Spotify-inspired vibrant color palette
+    
     const color = d3.scaleOrdinal()
-      .domain(countryStats.topGenres.map(d => d.genre))
+      .domain(["Live", "Mixed", "Studio"])
       .range([
-        "#1DB954", // Spotify Green
-        "#1ed760", // Light Spotify Green
-        "#ff6b35", // Spotify Orange
-        "#e22856", // Spotify Pink/Red
-        "#7c4dff", // Spotify Purple
-        "#00d4ff", // Spotify Blue
-        "#ffeb3b", // Spotify Yellow
-        "#4caf50", // Additional Green
-        "#ff9800", // Additional Orange
-        "#9c27b0"  // Additional Purple
+        "#e22856", // Spotify Pink/Red (Live)
+        "#1DB954", // Spotify Green (Mixed)
+        "#9c27b0"  // Purple (Studio)
       ])
-
+    
     const pie = d3.pie()
       .value(d => d.percentage)
       .sort(null)
-
+    
     const arc = d3.arc()
       .innerRadius(radius * 0.5)
       .outerRadius(radius * 0.85)
-
+    
     // Create the pie chart
     chart.selectAll("path")
-      .data(pie(countryStats.topGenres))
+      .data(pie(countryStats.livelinessDistribution))
       .enter()
       .append("path")
       .attr("d", arc)
-      .attr("fill", d => color(d.data.genre))
+      .attr("fill", d => color(d.data.category))
       .attr("stroke", "#121212")
       .style("stroke-width", "3px")
-
+    
     // Add percentages
     chart.selectAll("text.percentage")
-      .data(pie(countryStats.topGenres))
+      .data(pie(countryStats.livelinessDistribution))
       .enter()
       .append("text")
       .attr("class", "percentage")
@@ -266,25 +360,25 @@ const CountryStatistics = () => {
       .style("font-weight", "bold")
       .style("fill", "white")
       .style("font-family", "'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif")
-
+    
     // Add legend at the bottom
     const legend = svg.append("g")
-      .attr("transform", `translate(15, ${height - 85})`)
-
-    countryStats.topGenres.forEach((d, i) => {
+      .attr("transform", `translate(15, ${height - 70})`)
+    
+    countryStats.livelinessDistribution.forEach((d, i) => {
       const legendRow = legend.append("g")
         .attr("transform", `translate(0, ${i * 16})`)
       
       legendRow.append("rect")
         .attr("width", 12)
         .attr("height", 12)
-        .attr("fill", color(d.genre))
+        .attr("fill", color(d.category))
         .attr("rx", 2)
       
       legendRow.append("text")
         .attr("x", 18)
         .attr("y", 10)
-        .text(`${d.genre.substring(0, 15)}${d.genre.length > 15 ? '...' : ''}`)
+        .text(`${d.category}: ${Math.round(d.percentage)}%`)
         .style("font-size", "12px")
         .style("fill", "#FFFFFF")
         .style("font-family", "'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif")
@@ -299,83 +393,77 @@ const CountryStatistics = () => {
     
     const width = 350
     const height = 300
-    const margin = { top: 20, right: 30, bottom: 50, left: 50 }
-    const innerWidth = width - margin.left - margin.right
-    const innerHeight = height - margin.top - margin.bottom
+    const radius = Math.min(width, height - 80) / 2
     
     const chart = svg
       .attr("width", width)
       .attr("height", height)
       .append("g")
-      .attr("transform", `translate(${margin.left}, ${margin.top})`)
+      .attr("transform", `translate(${width / 2}, ${height / 2 - 30})`)
     
-    const x = d3.scaleBand()
-      .domain(countryStats.tempoDistribution.map(d => d.category))
-      .range([0, innerWidth])
-      .padding(0.3)
+    const color = d3.scaleOrdinal()
+      .domain(["Fast", "Medium", "Slow"])
+      .range([
+        "#e22856", // Spotify Pink/Red (Fast)
+        "#1DB954", // Spotify Green (Medium)
+        "#7c4dff"  // Spotify Purple (Slow)
+      ])
     
-    const y = d3.scaleLinear()
-      .domain([0, 100])
-      .range([innerHeight, 0])
-
-    // Different colors for each tempo category
-    const colorMap = {
-      "Fast": "#e22856",    // Spotify Pink/Red
-      "Medium": "#1DB954",  // Spotify Green
-      "Slow": "#7c4dff"     // Spotify Purple
-    }
+    const pie = d3.pie()
+      .value(d => d.percentage)
+      .sort(null)
     
-    // Add bars
-    chart.selectAll(".bar")
-      .data(countryStats.tempoDistribution)
+    const arc = d3.arc()
+      .innerRadius(radius * 0.5)
+      .outerRadius(radius * 0.85)
+    
+    // Create the pie chart
+    chart.selectAll("path")
+      .data(pie(countryStats.tempoDistribution))
       .enter()
-      .append("rect")
-      .attr("class", "bar")
-      .attr("x", d => x(d.category))
-      .attr("y", d => y(d.percentage))
-      .attr("width", x.bandwidth())
-      .attr("height", d => innerHeight - y(d.percentage))
-      .attr("fill", d => colorMap[d.category])
-      .attr("rx", 4)
+      .append("path")
+      .attr("d", arc)
+      .attr("fill", d => color(d.data.category))
+      .attr("stroke", "#121212")
+      .style("stroke-width", "3px")
     
-    // Add X axis
-    chart.append("g")
-      .attr("transform", `translate(0, ${innerHeight})`)
-      .call(d3.axisBottom(x))
-      .style("font-size", "12px")
-      .style("font-family", "'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif")
-      .selectAll("text")
-      .style("fill", "#FFFFFF")
-    
-    // Add Y axis
-    chart.append("g")
-      .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`))
-      .style("font-size", "12px")
-      .style("font-family", "'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif")
-      .selectAll("text")
-      .style("fill", "#FFFFFF")
-      
-    // Update axis lines
-    chart.selectAll(".domain")
-      .style("stroke", "#535353")
-      
-    chart.selectAll(".tick line")
-      .style("stroke", "#535353")
-    
-    // Add labels on top of bars
-    chart.selectAll(".label")
-      .data(countryStats.tempoDistribution)
+    // Add percentages
+    chart.selectAll("text.percentage")
+      .data(pie(countryStats.tempoDistribution))
       .enter()
       .append("text")
-      .attr("class", "label")
-      .attr("x", d => x(d.category) + x.bandwidth() / 2)
-      .attr("y", d => y(d.percentage) - 8)
+      .attr("class", "percentage")
+      .attr("transform", d => `translate(${arc.centroid(d)})`)
+      .attr("dy", "0.35em")
       .attr("text-anchor", "middle")
-      .text(d => `${Math.round(d.percentage)}%`)
+      .text(d => `${Math.round(d.data.percentage)}%`)
       .style("font-size", "14px")
       .style("font-weight", "bold")
-      .style("fill", "#FFFFFF")
+      .style("fill", "white")
       .style("font-family", "'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif")
+    
+    // Add legend at the bottom
+    const legend = svg.append("g")
+      .attr("transform", `translate(15, ${height - 70})`)
+    
+    countryStats.tempoDistribution.forEach((d, i) => {
+      const legendRow = legend.append("g")
+        .attr("transform", `translate(0, ${i * 16})`)
+      
+      legendRow.append("rect")
+        .attr("width", 12)
+        .attr("height", 12)
+        .attr("fill", color(d.category))
+        .attr("rx", 2)
+      
+      legendRow.append("text")
+        .attr("x", 18)
+        .attr("y", 10)
+        .text(`${d.category}: ${Math.round(d.percentage)}%`)
+        .style("font-size", "12px")
+        .style("fill", "#FFFFFF")
+        .style("font-family", "'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif")
+    })
   }
   
   const createEnergyChart = () => {
@@ -629,82 +717,77 @@ const CountryStatistics = () => {
     
     const width = 350
     const height = 300
-    const margin = { top: 20, right: 30, bottom: 50, left: 50 }
-    const innerWidth = width - margin.left - margin.right
-    const innerHeight = height - margin.top - margin.bottom
+    const radius = Math.min(width, height - 80) / 2
     
     const chart = svg
       .attr("width", width)
       .attr("height", height)
       .append("g")
-      .attr("transform", `translate(${margin.left}, ${margin.top})`)
-
-    const x = d3.scaleBand()
-      .domain(countryStats.acousticsDistribution.map(d => d.category))
-      .range([0, innerWidth])
-      .padding(0.3)
-
-    const y = d3.scaleLinear()
-      .domain([0, 100])
-      .range([innerHeight, 0])
-
-    // Different colors for each acoustic category
-    const colorMap = {
-      "Acoustic": "#4caf50",    // Green (Natural/Acoustic)
-      "Mixed": "#ff9800",       // Orange (Mixed)
-      "Electronic": "#9c27b0"   // Purple (Electronic/Synthetic)
-    }
+      .attr("transform", `translate(${width / 2}, ${height / 2 - 30})`)
     
-    // Add bars
-    chart.selectAll(".bar")
-      .data(countryStats.acousticsDistribution)
+    const color = d3.scaleOrdinal()
+      .domain(["Acoustic", "Mixed", "Electronic"])
+      .range([
+        "#4caf50", // Green (Natural/Acoustic)
+        "#ff9800", // Orange (Mixed)
+        "#9c27b0"  // Purple (Electronic/Synthetic)
+      ])
+    
+    const pie = d3.pie()
+      .value(d => d.percentage)
+      .sort(null)
+    
+    const arc = d3.arc()
+      .innerRadius(radius * 0.5)
+      .outerRadius(radius * 0.85)
+    
+    // Create the pie chart
+    chart.selectAll("path")
+      .data(pie(countryStats.acousticsDistribution))
       .enter()
-      .append("rect")
-      .attr("class", "bar")
-      .attr("x", d => x(d.category))
-      .attr("y", d => y(d.percentage))
-      .attr("width", x.bandwidth())
-      .attr("height", d => innerHeight - y(d.percentage))
-      .attr("fill", d => colorMap[d.category])
-      .attr("rx", 4)
+      .append("path")
+      .attr("d", arc)
+      .attr("fill", d => color(d.data.category))
+      .attr("stroke", "#121212")
+      .style("stroke-width", "3px")
     
-    // Add X axis
-    chart.append("g")
-      .attr("transform", `translate(0, ${innerHeight})`)
-      .call(d3.axisBottom(x))
-      .style("font-size", "12px")
-      .style("font-family", "'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif")
-      .selectAll("text")
-      .style("fill", "#FFFFFF")
-    
-    // Add Y axis
-    chart.append("g")
-      .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${d}%`))
-      .style("font-size", "12px")
-      .style("font-family", "'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif")
-      .selectAll("text")
-      .style("fill", "#FFFFFF")
-      
-    chart.selectAll(".domain")
-      .style("stroke", "#535353")
-      
-    chart.selectAll(".tick line")
-      .style("stroke", "#535353")
-    
-    // Add labels on top of bars
-    chart.selectAll(".label")
-      .data(countryStats.acousticsDistribution)
+    // Add percentages
+    chart.selectAll("text.percentage")
+      .data(pie(countryStats.acousticsDistribution))
       .enter()
       .append("text")
-      .attr("class", "label")
-      .attr("x", d => x(d.category) + x.bandwidth() / 2)
-      .attr("y", d => y(d.percentage) - 8)
+      .attr("class", "percentage")
+      .attr("transform", d => `translate(${arc.centroid(d)})`)
+      .attr("dy", "0.35em")
       .attr("text-anchor", "middle")
-      .text(d => `${Math.round(d.percentage)}%`)
+      .text(d => `${Math.round(d.data.percentage)}%`)
       .style("font-size", "14px")
       .style("font-weight", "bold")
-      .style("fill", "#FFFFFF")
+      .style("fill", "white")
       .style("font-family", "'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif")
+    
+    // Add legend at the bottom
+    const legend = svg.append("g")
+      .attr("transform", `translate(15, ${height - 70})`)
+    
+    countryStats.acousticsDistribution.forEach((d, i) => {
+      const legendRow = legend.append("g")
+        .attr("transform", `translate(0, ${i * 16})`)
+      
+      legendRow.append("rect")
+        .attr("width", 12)
+        .attr("height", 12)
+        .attr("fill", color(d.category))
+        .attr("rx", 2)
+      
+      legendRow.append("text")
+        .attr("x", 18)
+        .attr("y", 10)
+        .text(`${d.category}: ${Math.round(d.percentage)}%`)
+        .style("font-size", "12px")
+        .style("fill", "#FFFFFF")
+        .style("font-family", "'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif")
+    })
   }
 
   if (loading) return <div>Loading...</div>
@@ -716,10 +799,7 @@ const CountryStatistics = () => {
       <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Music Demographics Dashboard</h1>
-          <p className="dashboard-subtitle">{selectedCountry} Music Profile, Split by Genre, Mood, Energy, and Acoustics</p>
-        </div>
-        <div className="dashboard-note">
-          Charts are data-driven from Spotify dataset
+          <p className="dashboard-subtitle">🌍 Pick a country and dive into its musical DNA! 🎵 Will you find your favorite song or artist?</p>
         </div>
       </div>
       
@@ -736,6 +816,41 @@ const CountryStatistics = () => {
         </select>
       </div>
       
+      <div className="section-description">
+        <p>Discover the most popular songs in {selectedCountry} based on total popularity scores across our dataset. These tracks represent the biggest hits that have captured listeners' attention. <br />Click on any song with a 🎵 icon to listen on Spotify!</p>
+      </div>
+      
+      <div className="artist-section">
+        <h3>Top Songs in {selectedCountry}</h3>
+        <div className="artist-list">
+          {countryStats.topSongs.map((song, index) => (
+            <div 
+              key={index} 
+              className={`artist-card ${song.uri ? 'clickable-card' : ''}`}
+              onClick={() => {
+                if (song.uri && song.uri.length > 0) {
+                  window.open(song.uri, '_blank', 'noopener,noreferrer')
+                }
+              }}
+              style={song.uri ? { cursor: 'pointer' } : {}}
+            >
+              <div className="artist-rank">{index + 1}</div>
+              <div className="artist-info">
+                <h4>
+                  {song.title.charAt(0).toUpperCase() + song.title.slice(1)} {song.uri ? '🎵' : ''}
+                </h4>
+                <p>by {song.artist}</p>
+                <p className="popularity-score">Total popularity: {song.totalPopularity}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      <div className="section-description">
+        <p>Meet the most influential artists dominating {selectedCountry}'s music scene, ranked by their combined popularity across all tracks in our dataset. These musicians have consistently produced popular content and shaped the country's musical landscape.</p>
+      </div>
+      
       <div className="artist-section">
         <h3>Top Artists in {selectedCountry}</h3>
         <div className="artist-list">
@@ -744,11 +859,35 @@ const CountryStatistics = () => {
               <div className="artist-rank">{index + 1}</div>
               <div className="artist-info">
                 <h4>{artist.artist}</h4>
-                <p>{artist.count} songs ({Math.round(artist.percentage)}% of country's total)</p>
+                <p>{artist.songCount} songs</p>
+                <p className="popularity-score">Total popularity: {artist.totalPopularity}</p>
               </div>
             </div>
           ))}
         </div>
+      </div>
+      
+      <div className="section-description">
+        <p>Explore the musical genres that define {selectedCountry}'s sound and cultural identity. This breakdown shows the percentage distribution of different music styles, revealing the country's musical preferences and diversity.</p>
+      </div>
+      
+      <div className="artist-section">
+        <h3>Top Genres in {selectedCountry}</h3>
+        <div className="artist-list">
+          {countryStats.topGenres.map((genre, index) => (
+            <div key={index} className="artist-card">
+              <div className="artist-rank">{index + 1}</div>
+              <div className="artist-info">
+                <h4>{genre.genre}</h4>
+                <p>{Math.round(genre.percentage)}% of songs</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      <div className="section-description">
+        <p>Now let's take a deep dive into the musical DNA of {selectedCountry}! This comprehensive analysis explores the acoustic characteristics that define the country's sound - from the energy and mood of the tracks to their tempo and danceability. Discover what makes {selectedCountry}'s music unique through data-driven insights into the emotional and technical qualities of their most popular songs.</p>
       </div>
       
       <div className="stats-summary">
@@ -809,10 +948,10 @@ const CountryStatistics = () => {
       <div className="dashboard-grid">
         <div className="stat-card">
           <div className="card-header">
-            <h3 className="card-title">Genres</h3>
+            <h3 className="card-title">Liveliness</h3>
             <div className="card-icon">
               <svg viewBox="0 0 24 24">
-                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
               </svg>
             </div>
           </div>
@@ -822,7 +961,7 @@ const CountryStatistics = () => {
             </div>
           </div>
           <div className="card-footer">
-            Top 5 genres in {selectedCountry} music
+            Live vs recorded sound in music in {selectedCountry}
           </div>
         </div>
         
@@ -836,12 +975,12 @@ const CountryStatistics = () => {
             </div>
           </div>
           <div className="card-body">
-            <div className="bar-chart">
+            <div className="donut-chart">
               <svg ref={tempoChartRef}></svg>
             </div>
           </div>
           <div className="card-footer">
-            Distribution of song tempo in {selectedCountry}
+            Distribution of song tempo in music in {selectedCountry}
           </div>
         </div>
         
@@ -860,7 +999,7 @@ const CountryStatistics = () => {
             </div>
           </div>
           <div className="card-footer">
-            Energy levels in {selectedCountry} music
+            Energy levels in music in {selectedCountry}
           </div>
         </div>
         
@@ -879,7 +1018,7 @@ const CountryStatistics = () => {
             </div>
           </div>
           <div className="card-footer">
-            Danceability levels in {selectedCountry} music
+            Danceability levels in music in {selectedCountry}
           </div>
         </div>
         
@@ -898,7 +1037,7 @@ const CountryStatistics = () => {
             </div>
           </div>
           <div className="card-footer">
-            Mood distribution based on valence in {selectedCountry} music
+            Mood distribution based on valence in music in {selectedCountry}
           </div>
         </div>
         
@@ -912,12 +1051,12 @@ const CountryStatistics = () => {
             </div>
           </div>
           <div className="card-body">
-            <div className="bar-chart">
+            <div className="donut-chart">
               <svg ref={acousticsChartRef}></svg>
             </div>
           </div>
           <div className="card-footer">
-            Acoustic vs electronic sound in {selectedCountry} music
+            Acoustic vs electronic sound in music in {selectedCountry}
           </div>
         </div>
       </div>
