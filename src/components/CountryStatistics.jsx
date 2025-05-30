@@ -4,11 +4,10 @@ import { useMusicData } from '../context/MusicDataContext'
 import '../css/CountryStatistics.css'
 
 const CountryStatistics = ({ selectedCountry: propSelectedCountry }) => {
-  const { musicData, loading, error } = useMusicData()
+  const { musicData, globalThresholds, loading, error } = useMusicData()
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [countries, setCountries] = useState([])
   const [countryStats, setCountryStats] = useState(null)
-  const [globalThresholds, setGlobalThresholds] = useState(null)
   
   const genreChartRef = useRef(null)
   const tempoChartRef = useRef(null)
@@ -17,42 +16,8 @@ const CountryStatistics = ({ selectedCountry: propSelectedCountry }) => {
   const valenceChartRef = useRef(null)
   const acousticsChartRef = useRef(null)
 
-
-  // Calculate global percentile thresholds from entire dataset
-  const calculateGlobalThresholds = (data) => {
-    const calculatePercentiles = (values, p33, p67) => {
-      const sorted = values.filter(v => !isNaN(v)).sort((a, b) => a - b)
-      const len = sorted.length
-      return {
-        p33: sorted[Math.floor(len * p33)],
-        p67: sorted[Math.floor(len * p67)]
-      }
-    }
-
-    // Extract values for each feature
-    const tempoValues = data.map(song => parseFloat(song.tempo)).filter(v => !isNaN(v))
-    const energyValues = data.map(song => parseFloat(song.energy)).filter(v => !isNaN(v))
-    const danceabilityValues = data.map(song => parseFloat(song.danceability)).filter(v => !isNaN(v))
-    const valenceValues = data.map(song => parseFloat(song.valence)).filter(v => !isNaN(v))
-    const acousticsValues = data.map(song => parseFloat(song.acoustics)).filter(v => !isNaN(v))
-    const livelinessValues = data.map(song => parseFloat(song.liveliness)).filter(v => !isNaN(v))
-
-    return {
-      tempo: calculatePercentiles(tempoValues, 0.33, 0.67),
-      energy: calculatePercentiles(energyValues, 0.33, 0.67),
-      danceability: calculatePercentiles(danceabilityValues, 0.33, 0.67),
-      valence: calculatePercentiles(valenceValues, 0.33, 0.67),
-      acoustics: calculatePercentiles(acousticsValues, 0.33, 0.67),
-      liveliness: calculatePercentiles(livelinessValues, 0.33, 0.67)
-    }
-  }
-
   useEffect(() => {
-    if (musicData) {
-      // Calculate global thresholds first
-      const thresholds = calculateGlobalThresholds(musicData)
-      setGlobalThresholds(thresholds)
-
+    if (musicData && globalThresholds) {
       // Get unique countries with at least 30 songs
       const countryCounts = {}
       musicData.forEach(song => {
@@ -78,7 +43,7 @@ const CountryStatistics = ({ selectedCountry: propSelectedCountry }) => {
         setSelectedCountry(defaultCountry)
       }
     }
-  }, [musicData, propSelectedCountry])
+  }, [musicData, globalThresholds, propSelectedCountry])
 
   useEffect(() => {
     if (musicData && selectedCountry && globalThresholds) {
@@ -773,7 +738,7 @@ const CountryStatistics = ({ selectedCountry: propSelectedCountry }) => {
     <div className="music-dashboard">
       <div className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Music Demographics Dashboard</h1>
+          <h1 className="dashboard-title">Country Statistics</h1>
           <p className="dashboard-subtitle">🌍 Pick a country and dive into its musical DNA! Will you find your favorite song or artist? 🎵</p>
         </div>
       </div>
