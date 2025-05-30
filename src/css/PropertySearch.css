@@ -3,35 +3,12 @@
   max-width: none;
   margin: 0;
   padding: 0 0 40px 0;
-  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   background: #000000;
   min-height: 100vh;
   color: #FFFFFF;
   overflow-x: hidden;
   box-sizing: border-box;
-}
-
-.search-header {
-  text-align: center;
-  margin: 0 0 40px 0;
-  background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
-  padding: 40px 30px;
-  border-radius: 0;
-  box-shadow: 0 10px 30px rgba(29, 185, 84, 0.3);
-}
-
-.search-header h1 {
-  margin: 0;
-  font-size: 2.5rem;
-  font-weight: 900;
-  color: white;
-}
-
-.search-header p {
-  margin: 10px 0 0 0;
-  font-size: 1.2rem;
-  opacity: 0.9;
-  color: white;
 }
 
 .filters-container {
@@ -62,7 +39,7 @@
 }
 
 .filter-section-header h3 {
-  color: #1DB954;
+  color: #1ed760;
   margin: 0;
   font-size: 1.3rem;
   font-weight: 700;
@@ -70,7 +47,7 @@
 
 /* Remove the margin from regular filter-section h3 since we're using the header version */
 .filter-section h3:not(.filter-section-header h3) {
-  color: #1DB954;
+  color: #1ed760;
   margin-bottom: 15px;
   font-size: 1.3rem;
   font-weight: 700;
@@ -127,7 +104,7 @@
 .search-button {
   width: 100%;
   padding: 16px 24px;
-  background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+  background: linear-gradient(135deg, #1ed760 0%, #1ed760 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -136,12 +113,12 @@
   cursor: pointer;
   margin-top: 20px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+  box-shadow: 0 4px 15px rgba(30, 215, 96, 0.3);
 }
 
 .search-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(29, 185, 84, 0.4);
+  box-shadow: 0 8px 25px rgba(30, 215, 96, 0.4);
 }
 
 .suggestions-container {
@@ -155,7 +132,7 @@
 }
 
 .suggestions-container h2 {
-  color: #1DB954;
+  color: #1ed760;
   margin-bottom: 20px;
   font-size: 1.8rem;
   font-weight: 900;
@@ -188,7 +165,7 @@
 }
 
 .song-rank {
-  background: #1DB954;
+  background: #1ed760;
   color: white;
   width: 40px;
   height: 40px;
@@ -227,7 +204,7 @@
 
 .song-properties span {
   background: #282828;
-  color: #1DB954;
+  color: #1ed760;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.8rem;
@@ -255,7 +232,7 @@
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 30px;
-  border-left: 4px solid #1DB954;
+  border-left: 4px solid #1ed760;
 }
 
 .recommendation-intro p {
@@ -266,7 +243,7 @@
 }
 
 .recommendation-intro strong {
-  color: #1DB954;
+  color: #1ed760;
 }
 
 .recommendations-subtitle {
@@ -274,7 +251,6 @@
   color: #b3b3b3;
   font-size: 1rem;
   margin: 0 0 20px 0;
-  font-style: italic;
 }
 
 .multi-select-inputs {
@@ -316,7 +292,7 @@
 
 .multi-select-group .searchable-select .dropdown-content {
   background: #181818;
-  border: 1px solid #1DB954;
+  border: 1px solid #1ed760;
   border-radius: 6px;
   margin-top: 4px;
 }
@@ -325,7 +301,7 @@
   background: #282828;
   color: #FFFFFF;
   border: none;
-  border-bottom: 1px solid #1DB954;
+  border-bottom: 1px solid #1ed760;
 }
 
 .multi-select-group .searchable-select .option {
@@ -338,12 +314,12 @@
 }
 
 .multi-select-group .searchable-select .option.selected {
-  background: #1DB954;
+  background: #1ed760;
   color: white;
 }
 
 .multi-select-group .searchable-select .selected-tag {
-  background: #1DB954;
+  background: #1ed760;
   color: white;
   border-radius: 4px;
   padding: 4px 8px;
@@ -364,7 +340,7 @@
 }
 
 .no-results-content h2 {
-  color: #1DB954;
+  color: #1ed760;
   margin-bottom: 20px;
   font-size: 1.8rem;
   font-weight: 900;
@@ -390,7 +366,7 @@
   color: #b3b3b3;
   padding: 15px 20px;
   border-radius: 8px;
-  border-left: 4px solid #1DB954;
+  border-left: 4px solid #1ed760;
   text-align: left;
   font-size: 1rem;
   line-height: 1.4;

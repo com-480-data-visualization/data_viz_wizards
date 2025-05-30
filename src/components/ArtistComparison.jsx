@@ -6,6 +6,7 @@ import RankJitterPlot from './RankJitterPlot'
 import RadarChart from './RadarChart'
 import LoadingSpinner from './LoadingSpinner'
 import '../css/ArtistComparison.css'
+import '../css/CountryStatistics.css'
 
 const ArtistComparison = () => {
   const svgRef = useRef(null)
@@ -33,16 +34,12 @@ const ArtistComparison = () => {
 
   if (loading) return <LoadingSpinner />
   if (error) return <div className="error">Error loading data: {error.message}</div>
-
   return (
     <div className="artist-comparison-dashboard">
       <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Artist Comparison Dashboard</h1>
           <p className="dashboard-subtitle">Compare Musical Attributes Across Multiple Artists</p>
-        </div>
-        <div className="dashboard-note">
-          Interactive Radar Chart Analysis
         </div>
       </div>
 
