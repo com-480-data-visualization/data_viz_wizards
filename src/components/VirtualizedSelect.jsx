@@ -1,8 +1,7 @@
 import Select, { components } from 'react-select'
 import { FixedSizeList as List } from 'react-window'
-import './VirtualizedSelect.css'
+import '../css/VirtualizedSelect.css'
 
-// Custom virtualized menu component
 const MenuList = (props) => {
   const { options, children, maxHeight, getValue } = props
   const [value] = getValue()
@@ -37,14 +36,12 @@ const VirtualizedSelect = ({
   className = "",
   ...props
 }) => {
-  // Convert simple array to options format if needed
   const formattedOptions = Array.isArray(options) && options.length > 0
     ? (typeof options[0] === 'string' 
         ? options.map(option => ({ value: option, label: option }))
         : options)
     : []
 
-  // Convert value to proper format if needed
   const formattedValue = isMulti
     ? (Array.isArray(value) 
         ? value.map(v => typeof v === 'string' ? { value: v, label: v } : v)
@@ -212,4 +209,4 @@ const VirtualizedSelect = ({
   )
 }
 
-export default VirtualizedSelect 
+export default VirtualizedSelect

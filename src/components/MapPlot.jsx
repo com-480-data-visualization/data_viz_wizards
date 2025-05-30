@@ -12,11 +12,9 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
   const [filterValue, setFilterValue] = useState('all');
   const [filterOptions, setFilterOptions] = useState([]);
   const [title, setTitle] = useState('Music Popularity by Country');
-  //const [countryData, setCountryData] = useState([]);
   const [basePolygons, setBasePolygons] = useState([]);
   const [coloredPolygons, setColoredPolygons] = useState([]);
   const [showOverlay, setShowOverlay] = useState(() => {
-    // Check if user has already seen the overlay
     const hasSeenOverlay = localStorage.getItem('hasSeenMapOverlay');
     return hasSeenOverlay !== 'true';
   });
@@ -82,7 +80,6 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
   }, [processedData, filterType]);
 
   useEffect(() => {
-    // Only run once both music data and raw polygons exist
     if (!processedData?.dataByCountry || basePolygons.length === 0) return;
 
     const countryToPopularity = {};
@@ -108,7 +105,6 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
     const updated = basePolygons.map(poly => {
       const name = poly.properties.NAME || poly.properties.ADMIN;
 
-      // ISO-A3 code for USA
       const iso3 = poly.properties.ADM0_A3;
 
       const key = countryNameMapping[name]
@@ -139,7 +135,6 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
   }, [processedData, basePolygons, filterType, filterValue]);
 
   useEffect(() => {
-    // Load GeoJSON data for the globe
     fetch('https://raw.githubusercontent.com/vasturiano/react-globe.gl/master/example/datasets/ne_110m_admin_0_countries.geojson')
       .then(res => res.json())
       .then(geoJson => {
@@ -156,17 +151,21 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
 
 
   const handleCountryClick = (country) => {
-    const countryName = country.properties.NAME || country.properties.ADMIN;
-    const mappedName = countryNameMapping[countryName] || countryName;
-
+    const name = country.properties.NAME || country.properties.ADMIN
+    const iso3 = country.properties.ADM0_A3
+  
+    const mappedName =
+      countryNameMapping[name]  || 
+      countryNameMapping[iso3]  || 
+      name
+  
     if (processedData.dataByCountry?.[mappedName]) {
-      setSelectedCountry(mappedName);
-      setCurrentView('country-stats');
-      console.log(`Navigating to statistics for: ${mappedName}`);
+      setSelectedCountry(mappedName)
+      setCurrentView('country-stats')
+      console.log(`Navigating to statistics for: ${mappedName}`)
     }
-  };
+  }
 
-  // Color legend gradient
   const legendGradient = `linear-gradient(to right, 
   ${interpolateViridis(0)}, 
   ${interpolateViridis(0.25)}, 
@@ -276,7 +275,6 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
           </button>
         </div>
       )}
-      {/* Title */}
       <h1
         style={{
           position: 'absolute',
@@ -296,7 +294,6 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
         Spotify in Data: Popularity of Genres, Artists, and Songs Across the World
       </h1>
 
-      {/* Filter Controls */}
       <div
         className="filter-panel"
         style={{
@@ -315,14 +312,11 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
           {title}
         </h2>
 
-        
-
-        {/* Filter by type */}
         <div className="filter-row" style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
           <label style={{ marginRight: '8px' }}>Filter by:</label>
           <Select
             styles={selectStyles}
-            options={typeOptions}                                // ← use the memoized list
+            options={typeOptions}
             value={typeOptions.find(o => o.value === filterType)}
             onChange={opt => {
               setFilterType(opt.value)
@@ -334,12 +328,11 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
           />
         </div>
 
-        {/* Filter by value */}
         <div className="filter-row" style={{ display: 'flex', alignItems: 'center' }}>
           <label style={{ marginRight: '8px' }}>Value:</label>
           <Select
             styles={selectStyles}
-            options={valueOptions}                               // ← use the memoized list
+            options={valueOptions}
             value={valueOptions.find(o => o.value === filterValue)}
             onChange={opt => setFilterValue(opt.value)}
             isSearchable
@@ -349,7 +342,6 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
         </div>
       </div>
 
-      {/* Globe */}
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
         {coloredPolygons.length > 0 && (
           <Globe
@@ -375,12 +367,10 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
             polygonsTransitionDuration={300}
             width={window.innerWidth}
             height={window.innerHeight}
-          //key={JSON.stringify(coloredPolygons)}
           />
         )}
       </div>
 
-      {/* Color Legend */}
       <div
         className="color-legend"
         style={{

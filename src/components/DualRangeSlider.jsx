@@ -28,7 +28,6 @@ const DualRangeSlider = ({
     const percentage = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
     const value = min + percentage * (max - min)
     
-    // Round to step
     const steppedValue = Math.round(value / step) * step
 
     if (isDragging === 'min') {
@@ -55,7 +54,6 @@ const DualRangeSlider = ({
     }
   }, [isDragging, minValue, maxValue])
 
-  // Ensure percentages are properly constrained
   const minPercent = Math.max(0, Math.min(100, ((minValue - min) / (max - min)) * 100))
   const maxPercent = Math.max(0, Math.min(100, ((maxValue - min) / (max - min)) * 100))
 

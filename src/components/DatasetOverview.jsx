@@ -1,4 +1,3 @@
-// src/components/DatasetOverview.jsx
 import React, { useMemo } from 'react'
 import { useMusicData } from '../context/MusicDataContext'
 import {
@@ -94,7 +93,6 @@ export default function DatasetOverview() {
         </p>
       </section>
 
-      {/* 2×2 Bar chart grid */}
       <section style={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',

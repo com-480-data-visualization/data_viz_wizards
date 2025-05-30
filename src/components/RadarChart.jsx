@@ -5,7 +5,6 @@ const RadarChart = ({ selectedArtists, artistStats }) => {
   const [tooltipContent, setTooltipContent] = useState(null)
   const [hoveredAttribute, setHoveredAttribute] = useState(null)
 
-  // Feature descriptions and level descriptions
   const featureDescriptions = {
     danceability: {
       tooltip: "How dance-friendly a track is, from very rigid to groove-filled.",
@@ -57,14 +56,12 @@ const RadarChart = ({ selectedArtists, artistStats }) => {
     }
   }
 
-  // Function to determine value level
   const getValueLevel = (value) => {
     if (value <= 0.33) return 'low'
     if (value <= 0.66) return 'medium'
     return 'high'
   }
 
-  // Emoji mappings for attributes
   const attributeEmojis = {
     danceability: '💃',
     energy: '⚡️',
@@ -74,7 +71,6 @@ const RadarChart = ({ selectedArtists, artistStats }) => {
     valence: '😊'
   }
 
-  // Color palette for multiple artists
   const colors = [
     '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff00', 
     '#ff00ff', '#00ffff', '#ff0000', '#0000ff', '#ffff00'
@@ -133,7 +129,6 @@ const RadarChart = ({ selectedArtists, artistStats }) => {
                         onMouseLeave={() => setHoveredAttribute(null)}
                         style={{ cursor: 'pointer' }}
                       >
-                        {/* Enhanced background circle for hovered state */}
                         {isHovered && (
                           <circle
                             cx={x}
@@ -216,14 +211,11 @@ const RadarChart = ({ selectedArtists, artistStats }) => {
                 </div>
                 
                 <div className="four-column-container">
-                  {/* Top description spanning all columns */}
                   <div className="wide-description top-description">
                     <p>{tooltipContent.featureInfo?.levels.high || "High level"}</p>
                   </div>
                   
-                  {/* Main content area with four artist columns */}
                   <div className="main-content-area">
-                    {/* Artist columns (all 4) */}
                     {Array.from({ length: 4 }).map((_, columnIndex) => {
                       const artist = tooltipContent.payload[columnIndex];
                       return (
@@ -255,7 +247,6 @@ const RadarChart = ({ selectedArtists, artistStats }) => {
                     })}
                   </div>
                   
-                  {/* Bottom description spanning all columns */}
                   <div className="wide-description bottom-description">
                     <p>{tooltipContent.featureInfo?.levels.low || "Low level"}</p>
                   </div>

@@ -8,6 +8,7 @@ import '../css/CountryStatistics.css'
 const CountryStatistics = ({ selectedCountry: propSelectedCountry }) => {
   const { musicData, globalThresholds, validCountries, getCountryStats, loading, error } = useMusicData()
   const [selectedCountry, setSelectedCountry] = useState(null)
+  console.log("Selected country: ", selectedCountry)
   const [countryStats, setCountryStats] = useState(null)
   
   const genreChartRef = useRef(null)
@@ -18,17 +19,19 @@ const CountryStatistics = ({ selectedCountry: propSelectedCountry }) => {
   const acousticsChartRef = useRef(null)
 
   useEffect(() => {
-    if (validCountries.length > 0) {
-      if (propSelectedCountry && validCountries.includes(propSelectedCountry)) {
-        setSelectedCountry(propSelectedCountry)
-      } else if (!selectedCountry) {
-        const defaultCountry = validCountries.includes('Spain') 
-          ? 'Spain' 
-          : validCountries[0]
-        setSelectedCountry(defaultCountry)
-      }
+    if (propSelectedCountry && validCountries.includes(propSelectedCountry)) {
+      setSelectedCountry(propSelectedCountry)
     }
-  }, [validCountries, propSelectedCountry, selectedCountry])
+  }, [propSelectedCountry, validCountries])
+
+  useEffect(() => {
+    if (validCountries.length > 0 && !propSelectedCountry && !selectedCountry) {
+      const defaultCountry = validCountries.includes('Spain') 
+        ? 'Spain' 
+        : validCountries[0]
+      setSelectedCountry(defaultCountry)
+    }
+  }, [validCountries])
 
   useEffect(() => {
     if (selectedCountry) {

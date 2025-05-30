@@ -27,4 +27,4 @@ const LoadingSpinner = ({ message = "Loading Data..." }) => {
   )
 }
 
-export default LoadingSpinner 
+export default LoadingSpinner

@@ -37,4 +37,4 @@ const Navigation = ({ currentView, setCurrentView }) => {
   )
 }
 
-export default Navigation 
+export default Navigation

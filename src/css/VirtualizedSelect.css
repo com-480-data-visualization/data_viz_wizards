@@ -86,7 +86,6 @@
   background-color: #16A64A !important;
 }
 
-/* Disabled state */
 .virtualized-select-container .react-select__control--is-disabled {
   background-color: #1a1a1a !important;
   border-color: #333333 !important;
@@ -98,12 +97,10 @@
   color: #666666 !important;
 }
 
-/* Clear indicator hover effect */
 .virtualized-select-container .react-select__clear-indicator:hover {
   color: #ff6b6b !important;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .virtualized-select-container .react-select__control {
     min-height: 44px !important;

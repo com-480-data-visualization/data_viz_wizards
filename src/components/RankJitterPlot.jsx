@@ -11,19 +11,16 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
   const [containerWidth, setContainerWidth] = useState(1200)
   const svgRef = useRef(null)
   const chartContainerRef = useRef(null)
-  
-  // Color palette matching the radar chart
+
   const colors = [
     '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff00', 
     '#ff00ff', '#00ffff', '#ff0000', '#0000ff', '#ffff00'
   ]
-  
-  // Chart dimensions - now responsive
+
   const margin = { top: 60, right: 60, bottom: 60, left: 60 }
-  const width = Math.max(containerWidth - margin.left - margin.right, 400) // Ensure minimum width
+  const width = Math.max(containerWidth - margin.left - margin.right, 400)
   const height = 400 - margin.top - margin.bottom
-  
-  // Effect to handle container resize
+
   useEffect(() => {
     const handleResize = () => {
       if (chartContainerRef.current) {
@@ -35,7 +32,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
       }
     }
 
-    // Use ResizeObserver for more reliable container size detection
     let resizeObserver
     if (chartContainerRef.current) {
       resizeObserver = new ResizeObserver((entries) => {
@@ -49,14 +45,12 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
       resizeObserver.observe(chartContainerRef.current)
     }
 
-    // Fallback to initial measurement and window resize with a small delay
     const timeout = setTimeout(() => {
       handleResize()
     }, 100)
     
     window.addEventListener('resize', handleResize)
     
-    // Cleanup
     return () => {
       clearTimeout(timeout)
       window.removeEventListener('resize', handleResize)
@@ -65,8 +59,7 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
       }
     }
   }, [])
-  
-  // Memoize artist color mapping to prevent recalculation
+
   const artistColorMap = useMemo(() => {
     const colorMap = {}
     selectedArtists.forEach((artist, index) => {
@@ -75,11 +68,9 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
     return colorMap
   }, [selectedArtists])
 
-  // Process data when artistStats changes
   useEffect(() => {
     if (!artistStats) return
     
-    // Convert artistStats to flat array of data points
     const data = []
     Object.entries(artistStats).forEach(([artistName, stats]) => {
       if (stats && stats.popuMaxList) {
@@ -87,7 +78,7 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
           data.push({
             artist: artistName,
             rank: rank,
-            id: `${artistName}-${rank}-${index}` // Use index instead of random for consistency
+            id: `${artistName}-${rank}-${index}`
           })
         })
       }
@@ -95,20 +86,16 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
     
     setChartData(data)
   }, [artistStats])
-  
-  // Create/update D3 chart
+
   useEffect(() => {
     if (!chartData.length || !svgRef.current || containerWidth <= 0) return
     
-    // Clear previous chart
     d3.select(svgRef.current).selectAll('*').remove()
     
-    // Create SVG
     const svg = d3.select(svgRef.current)
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom)
     
-    // Add gradient definitions
     const defs = svg.append('defs')
     
     const gradient = defs.append('linearGradient')
@@ -131,12 +118,10 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
     const g = svg.append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`)
     
-    // Create scales
     const xScale = d3.scaleLinear()
       .domain([1, d3.max(chartData, d => d.rank)])
       .range([width, 0])
     
-    // Add x-axis with dark theme styling
     const maxRank = d3.max(chartData, d => d.rank)
     const tickValues = [1, 10, 50, 100, 200, 500, 1000]
       .filter(tick => tick <= maxRank)
@@ -149,11 +134,9 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
       .style('font-family', 'Circular Std, Helvetica Neue, Arial, sans-serif')
       .style('font-size', '14px')
     
-    // Style axis lines
     g.selectAll('.domain, .tick line')
       .style('stroke', '#282828')
     
-    // Add axis label
     g.append('text')
       .attr('class', 'axis-label')
       .attr('x', width / 2)
@@ -163,7 +146,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
       .style('fill', '#B3B3B3')
       .style('font-family', 'Circular Std, Helvetica Neue, Arial, sans-serif')
     
-    // Add vertical guide lines at ranks 10 and 50
     const guidelines = [10, 50, 200]
     
     g.selectAll('.guideline')
@@ -180,7 +162,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
       .style('stroke-dasharray', '5,5')
       .style('opacity', 0)
     
-    // Add labels for guidelines (initially hidden)
     g.selectAll('.guideline-label')
       .data(guidelines)
       .enter()
@@ -188,16 +169,15 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
       .attr('class', 'guideline-label')
       .attr('x', d => {
         const x = xScale(d)
-        return x + 10  // Position all labels to the right of the lines
+        return x + 10
       })
       .attr('y', 20)
-      .attr('text-anchor', 'start')  // Left-align all text since they're all to the right
+      .attr('text-anchor', 'start')
       .style('fill', '#B3B3B3')
       .style('font-family', 'Circular Std, Helvetica Neue, Arial, sans-serif')
       .style('font-size', '13px')
       .style('opacity', 0)
     
-    // Add gradient rectangles to the right of guidelines
     g.selectAll('.guideline-gradient')
       .data(guidelines)
       .enter()
@@ -212,7 +192,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
     
   }, [chartData, width, height, containerWidth])
 
-  // Calculate stats for selected artist
   const getArtistStats = (artist) => {
     if (!artist || !artistStats[artist]) return { top10: 0, top50: 0, total: 0, bestRank: null }
     
@@ -224,31 +203,26 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
     
     return { top10, top50, total, bestRank }
   }
-  
-  // Update guidelines when artist is selected
+
   useEffect(() => {
     if (!svgRef.current) return
     
     const svg = d3.select(svgRef.current)
     const stats = getArtistStats(selectedArtist)
     
-    // Create dynamic guidelines array
     const staticGuidelines = [10, 50, 200]
     const dynamicGuidelines = selectedArtist && stats.bestRank ? [...staticGuidelines, stats.bestRank] : staticGuidelines
     
-    // Update static guidelines visibility
     svg.selectAll('.guideline')
       .transition()
       .duration(200)
       .style('opacity', selectedArtist ? 0.7 : 0)
     
-    // Update gradient rectangles visibility
     svg.selectAll('.guideline-gradient')
       .transition()
       .duration(200)
       .style('opacity', selectedArtist ? 1 : 0)
     
-    // Handle best rank guideline
     const bestRankLine = svg.select('.best-rank-guideline')
     
     if (selectedArtist && stats.bestRank) {
@@ -257,7 +231,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
         .range([width, 0])
       
       if (bestRankLine.empty()) {
-        // Create new best rank guideline
         svg.select('g').append('line')
           .attr('class', 'best-rank-guideline')
           .attr('x1', xScale(stats.bestRank))
@@ -272,7 +245,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
           .duration(200)
           .style('opacity', 0.8)
       } else {
-        // Update existing best rank guideline
         bestRankLine
           .transition()
           .duration(200)
@@ -281,7 +253,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
           .style('opacity', 0.8)
       }
     } else {
-      // Remove best rank guideline
       bestRankLine
         .transition()
         .duration(200)
@@ -289,7 +260,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
         .remove()
     }
     
-    // Update static labels
     const xScale = d3.scaleLinear()
       .domain([1, d3.max(chartData, d => d.rank)])
       .range([width, 0])
@@ -306,10 +276,8 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
         const topText = `${count}`
         const bottomText = d === 200 ? 'tracks in top 200' : `tracks in top ${d}`
         
-        // Clear existing content
         d3.select(this).selectAll('*').remove()
         
-        // Add first line (count)
         d3.select(this).append('tspan')
           .attr('x', xScale(d) + 10)
           .attr('dy', '0')
@@ -317,7 +285,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
           .style('font-size', '16px')
           .text(topText)
         
-        // Add second line (description)
         d3.select(this).append('tspan')
           .attr('x', xScale(d) + 10)
           .attr('dy', '1.2em')
@@ -328,7 +295,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
       .duration(200)
       .style('opacity', selectedArtist ? 1 : 0)
     
-    // Handle best rank label
     const bestRankLabel = svg.select('.best-rank-label')
     
     if (selectedArtist && stats.bestRank) {
@@ -337,7 +303,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
         .range([width, 0])
       
       if (bestRankLabel.empty()) {
-        // Create new best rank label
         svg.select('g').append('text')
           .attr('class', 'best-rank-label')
           .attr('x', xScale(stats.bestRank) - 10)
@@ -366,11 +331,9 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
           .duration(200)
           .style('opacity', 1)
       } else {
-        // Update existing best rank label
         const tspans = bestRankLabel.selectAll('tspan')
         
         if (tspans.size() === 0) {
-          // If no tspans exist, create them
           bestRankLabel.append('tspan')
             .attr('x', xScale(stats.bestRank) - 10)
             .attr('dy', '0')
@@ -384,7 +347,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
             .style('font-weight', '400')
             .text('best track rank')
         } else {
-          // Update existing tspans
           tspans.nodes()[0] && d3.select(tspans.nodes()[0])
             .text(`${stats.bestRank}`)
           
@@ -398,14 +360,12 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
           .attr('x', xScale(stats.bestRank) - 10)
           .style('opacity', 1)
         
-        // Transition the tspan positions
         bestRankLabel.selectAll('tspan')
           .transition()
           .duration(200)
           .attr('x', xScale(stats.bestRank) - 10)
       }
     } else {
-      // Remove best rank label
       bestRankLabel
         .transition()
         .duration(200)
@@ -413,8 +373,7 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
         .remove()
     }
   }, [selectedArtist, artistStats, chartData, width, height])
-  
-  // Add x-axis label for closest dot
+
   useEffect(() => {
     if (!svgRef.current) return
     
@@ -430,13 +389,11 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
       const dotPosition = getDotPosition(closestDot)
       const lineX = xScale(closestDot.rank)
       
-      // Position label on opposite side of x-axis from the point
       const pointY = dotPosition.y - margin.top
       const axisY = height / 2
-      const labelY = pointY < axisY ? axisY + 25 : axisY - 15  // Below axis if point above, above axis if point below
+      const labelY = pointY < axisY ? axisY + 25 : axisY - 15
       
       if (closestDotLabel.empty()) {
-        // Create new closest dot label
         svg.select('g').append('text')
           .attr('class', 'closest-dot-label')
           .attr('x', lineX)
@@ -452,7 +409,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
           .duration(150)
           .style('opacity', 1)
       } else {
-        // Update existing closest dot label
         closestDotLabel
           .transition()
           .duration(150)
@@ -463,7 +419,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
       }
       
       if (closestDotLine.empty()) {
-        // Create new closest dot line
         svg.select('g').append('line')
           .attr('class', 'closest-dot-line')
           .attr('x1', lineX)
@@ -478,7 +433,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
           .duration(150)
           .style('opacity', 0.8)
       } else {
-        // Update existing closest dot line
         closestDotLine
           .transition()
           .duration(150)
@@ -489,7 +443,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
           .style('opacity', 0.8)
       }
     } else {
-      // Remove closest dot label and line
       closestDotLabel
         .transition()
         .duration(150)
@@ -503,8 +456,7 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
         .remove()
     }
   }, [closestDot, chartData, width, height])
-  
-  // Calculate dot positions with consistent jitter
+
   const getDotPosition = (item) => {
     const xScale = d3.scaleLinear()
       .domain([1, d3.max(chartData, d => d.rank)])
@@ -513,19 +465,15 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
     const x = xScale(item.rank) + margin.left
     let y = height / 2 + margin.top
     
-    // If this artist is selected, add consistent vertical offset based on item ID
     if (selectedArtist === item.artist) {
-      // Use a deterministic pseudo-random based on item ID for consistent positioning
       const hash = item.id.split('').reduce((a, b) => {
         a = ((a << 5) - a) + b.charCodeAt(0)
         return a & a
       }, 0)
       
-      // Increase variance and ensure minimum distance from axis
-      const rawJitter = (Math.abs(hash) % 100 - 50) * 2 // Increased variance from 1.5 to 2.5
-      const minDistance = 30 // Minimum distance from x-axis
+      const rawJitter = (Math.abs(hash) % 100 - 50) * 2
+      const minDistance = 30
       
-      // Ensure jitter is at least minDistance away from center
       let jitter = rawJitter
       if (Math.abs(jitter) < minDistance) {
         jitter = jitter >= 0 ? minDistance : -minDistance
@@ -537,7 +485,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
     return { x, y }
   }
 
-  // Handle mouse move to find closest dot
   const handleMouseMove = (event) => {
     if (!chartContainerRef.current || !chartData.length) return
 
@@ -545,7 +492,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
     const mouseX = event.clientX - rect.left
     const mouseY = event.clientY - rect.top
 
-    // Find the closest visible dot
     let closestDistance = Infinity
     let closest = null
 
@@ -553,7 +499,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
       const isSelected = selectedArtist === item.artist
       const isOtherArtist = selectedArtist && !isSelected
       
-      // Skip faded out dots
       if (isOtherArtist) return
 
       const { x, y } = getDotPosition(item)
@@ -565,15 +510,12 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
       }
     })
 
-    // Only show tooltip if cursor is within reasonable distance (e.g., 50 pixels)
     if (closest && closestDistance < 80) {
       setClosestDot(closest)
       
-      // Extract index from item.id (format: "artistName-rank-index")
       const parts = closest.id.split('-')
       const index = parseInt(parts[parts.length - 1])
       
-      // Get track title from artistStats
       const trackTitle = artistStats[closest.artist]?.title?.[index] || `Track ${index}`
       
       setTooltip({
@@ -593,25 +535,20 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
     setTooltip({ visible: false, x: 0, y: 0, content: '' })
   }
 
-  // Handle artist selection
   const handleArtistHover = (artist) => {
     setSelectedArtist(artist)
   }
 
-  // Handle dot click to open URI
   const handleDotClick = (item) => {
-    // Extract index from item.id (format: "artistName-rank-index")
     const parts = item.id.split('-')
     const index = parseInt(parts[parts.length - 1])
     
-    // Get URI from artistStats
     const uri = artistStats[item.artist]?.uri?.[index]
     if (uri) {
       window.open(uri, '_blank')
     }
   }
 
-  // Handle chart container click to open URI for closest dot
   const handleChartClick = () => {
     if (closestDot) {
       handleDotClick(closestDot)
@@ -623,7 +560,7 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
       <div className="card-header">
         <div className="card-header-content">
           <h3 className="card-title">Artist Song Rankings Distribution</h3>
-          <p className="card-description">Each dot is a track—see how many songs cracked the Top 10, Top 50 or Top 200 on the global singles chart</p>
+          <p className="card-description">Each dot is a track—see how many songs cracked the Top 10, Top 50 or Top 200 on the global singles chart. Click on it to listen to it on Spotify.</p>
         </div>
         <div className="card-icon">
           <svg viewBox="0 0 24 24">
@@ -690,7 +627,7 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
                       opacity: isOtherArtist ? 0.15 : 1,
                     }}
                     transition={{
-                      duration: 0.3, // Simplified transition
+                      duration: 0.3,
                       ease: "easeOut"
                     }}
                     r={isClosest ? 5 : (isSelected ? 4 : 2.5)}
@@ -706,7 +643,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
             </AnimatePresence>
           </svg>
 
-          {/* Tooltip */}
           <AnimatePresence>
             {tooltip.visible && (
               <motion.div

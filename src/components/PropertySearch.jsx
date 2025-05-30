@@ -107,7 +107,6 @@ const PropertySearch = () => {
     
     setHasSearched(true)
 
-    // Filter songs that match the user's criteria
     const filteredSongs = musicData.filter(song => {
       const tempo = parseFloat(song.tempo) || 0
       const valence = parseFloat(song.valence) || 0
@@ -125,24 +124,20 @@ const PropertySearch = () => {
         }
       }
 
-      // Check if song meets all filter criteria
       const tempoMatch = tempo >= filters.tempoMin && tempo <= filters.tempoMax
       const valenceMatch = valence >= filters.valenceMin && valence <= filters.valenceMax
       const energyMatch = energy >= filters.energyMin && energy <= filters.energyMax
       const danceabilityMatch = danceability >= filters.danceabilityMin && danceability <= filters.danceabilityMax
       const acousticsMatch = acoustics >= filters.acousticsMin && acoustics <= filters.acousticsMax
       
-      // Genre: if genres selected, song must match one of them
       const genreMatch = filters.genres.length === 0 || filters.genres.includes(song.Genre)
       
-      // Artist: if artists selected, song must be by one of them  
       const artistMatch = filters.artists.length === 0 || filters.artists.includes(artistName)
 
       return tempoMatch && valenceMatch && energyMatch && danceabilityMatch && 
              acousticsMatch && genreMatch && artistMatch
     })
 
-    // Convert to our format and remove duplicates
     const formattedSongs = filteredSongs.map(song => {
       let artistName = 'Unknown'
       if (song.Artist) {
@@ -169,7 +164,6 @@ const PropertySearch = () => {
       }
     })
 
-    // Remove duplicates
     const uniqueSongs = []
     const seenKeys = new Set()
     
@@ -180,9 +174,8 @@ const PropertySearch = () => {
       }
     }
 
-    // Randomly shuffle and take 5
     const randomSongs = uniqueSongs
-      .sort(() => Math.random() - 0.5)  // Random shuffle
+      .sort(() => Math.random() - 0.5)
       .slice(0, 5)
 
     setSuggestions(randomSongs)
