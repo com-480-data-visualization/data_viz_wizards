@@ -5,6 +5,7 @@ import SearchableSelect from './SearchableSelect'
 import RankJitterPlot from './RankJitterPlot'
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend, ResponsiveContainer, Tooltip } from 'recharts'
 import '../css/ArtistComparison.css'
+import '../css/CountryStatistics.css'
 
 const ArtistComparison = () => {
   const svgRef = useRef(null)
@@ -109,16 +110,12 @@ const ArtistComparison = () => {
 
   if (loading) return <div className="loading">Loading...</div>
   if (error) return <div className="error">Error loading data: {error.message}</div>
-
   return (
     <div className="artist-comparison-dashboard">
       <div className="dashboard-header">
         <div>
           <h1 className="dashboard-title">Artist Comparison Dashboard</h1>
           <p className="dashboard-subtitle">Compare Musical Attributes Across Multiple Artists</p>
-        </div>
-        <div className="dashboard-note">
-          Interactive Radar Chart Analysis
         </div>
       </div>
 
@@ -194,11 +191,11 @@ const ArtistComparison = () => {
                                   cx={x}
                                   cy={y - 18}
                                   r={6}
-                                  fill="#1DB954"
+                                  fill="#1ed760"
                                   stroke="#fff"
                                   strokeWidth={2}
                                   style={{
-                                    filter: 'drop-shadow(0 0 8px #1DB954)'
+                                    filter: 'drop-shadow(0 0 8px #1ed760)'
                                   }}
                                 />
                               )}
@@ -206,12 +203,12 @@ const ArtistComparison = () => {
                                 x={x}
                                 y={y}
                                 textAnchor={textAnchor}
-                                fill={isHovered ? "#1DB954" : "#FFFFFF"}
+                                fill={isHovered ? "#1ed760" : "#FFFFFF"}
                                 fontSize={isHovered ? "16px" : "12px"}
                                 fontWeight={isHovered ? "900" : "500"}
                                 stroke="none"
                                 style={{ 
-                                  fontFamily: 'Circular Std, Helvetica Neue, Arial, sans-serif',
+                                  fontFamily: 'Helvetica Neue, Arial, sans-serif',
                                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                   cursor: 'pointer'
                                 }}

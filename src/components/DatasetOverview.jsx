@@ -78,7 +78,10 @@ export default function DatasetOverview() {
         <h2 style={{ color: '#1ED760', textAlign: 'left' }}>Popularity</h2>
         <p style={{ color: '#ccc', lineHeight: 1.5, textAlign: 'left' }}>
           Popularity is computed by summing each track's daily chart positions (weighted toward higher ranks)
-          over all days and countries. Higher totals indicate consistently top-ranked tracks.
+          over all days and countries. Higher totals indicate consistently top-ranked tracks. 
+          As different countries have different songs on differrent Chart positions, the average
+          popularity score differs from country to country. This can be seen on the globe visualization
+          when not filtering for an attribute.
         </p>
       </section>
 

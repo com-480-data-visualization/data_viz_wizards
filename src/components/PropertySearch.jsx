@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useMusicData } from '../context/MusicDataContext'
 import DualRangeSlider from './DualRangeSlider'
 import SearchableSelect from './SearchableSelect'
+import '../css/CountryStatistics.css'
 import '../css/PropertySearch.css'
 
 const PropertySearch = () => {
@@ -195,9 +196,11 @@ const PropertySearch = () => {
 
   return (
     <div className="property-search">
-      <div className="search-header">
-        <h1>🎶 Music Discovery</h1>
-        <p>Get personalized song recommendations by setting your musical preferences!</p>
+      <div className="dashboard-header">
+        <div>
+          <h1 className="dashboard-title">🎶 Music Discovery</h1>
+          <p className="dashboard-subtitle">Get personalized song recommendations by setting your musical preferences!</p>
+        </div>
       </div>
 
       <div className="filters-container">

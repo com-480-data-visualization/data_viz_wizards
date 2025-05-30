@@ -1,23 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Circular+Std:wght@300;400;500;600;700;900&display=swap');
-
 .music-dashboard {
   width: 100%;
   max-width: none;
   margin: 0;
-  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   background: #000000;
   min-height: 100vh;
   padding-bottom: 40px;
 }
 
 .dashboard-header {
-  background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+  background: #000000;
   color: white;
   padding: 40px 30px;
   border-radius: 0;
   margin-bottom: 20px;
   position: relative;
-  box-shadow: 0 10px 30px rgba(29, 185, 84, 0.3);
   overflow: hidden;
 }
 
@@ -32,14 +29,26 @@
   pointer-events: none;
 }
 
+.dashboard-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 2px;
+  background: #1ed760;
+}
+
 .dashboard-title {
   margin: 0;
   font-size: 2.8rem;
   font-weight: 900;
+  color: #FFFFFF;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
   letter-spacing: -1px;
   position: relative;
   z-index: 1;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .dashboard-subtitle {
@@ -49,10 +58,11 @@
   opacity: 0.9;
   position: relative;
   z-index: 1;
+  text-align: center;
 }
 
 .dashboard-note {
-  background: #1DB954;
+  background: #1ed760;
   color: white;
   padding: 16px 28px;
   border-radius: 25px;
@@ -75,7 +85,7 @@
   background: linear-gradient(135deg, #181818 0%, #282828 100%);
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  border: 1px solid #1DB954;
+  border: 1px solid #1ed760;
 }
 
 .country-selector label {
@@ -93,7 +103,7 @@
   min-width: 250px;
   background: #121212;
   color: #FFFFFF;
-  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-weight: 500;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -102,7 +112,7 @@
 
 .country-selector select:focus {
   outline: none;
-  border-color: #1DB954;
+  border-color: #1ed760;
   box-shadow: 0 0 0 4px rgba(29, 185, 84, 0.2), 0 8px 25px rgba(0, 0, 0, 0.4);
   transform: translateY(-2px);
 }
@@ -128,16 +138,17 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   margin-bottom: 10px;
   border: 1px solid #282828;
+  min-height: 420px;
 }
 
 .stat-card:hover {
   transform: translateY(-10px) scale(1.02);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-  border-color: #1DB954;
+  border-color: #1ed760;
 }
 
 .card-header {
-  background: #1DB954;
+  background: #1ed760;
   color: white;
   padding: 20px 25px;
   display: flex;
@@ -198,7 +209,6 @@
   padding: 10px 20px 25px;
   font-size: 1rem;
   color: #B3B3B3;
-  font-style: italic;
   font-weight: 500;
   background: #121212;
   text-align: center;
@@ -210,10 +220,6 @@
   display: flex;
   justify-content: center;
   height: 320px;
-}
-
-.stat-card {
-  min-height: 420px;
 }
 
 .artist-section {
@@ -256,7 +262,7 @@
 .artist-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-  border-color: #1DB954;
+  border-color: #1ed760;
   background: #1f1f1f;
 }
 
@@ -265,7 +271,7 @@
   height: 38px;
   font-size: 1.0rem;
   margin-right: 10px;
-  background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+  background: #1ed760;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -308,8 +314,17 @@
 .artist-info .popularity-score {
   text-align: center;
   font-weight: 600;
-  color: #1DB954;
+  color: #1ed760;
   font-size: 0.8rem;
+}
+
+.artist-info p.popularity-score {
+  font-weight: 600;
+  color: #1ed760;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  margin-top: 4px;
 }
 
 .stats-summary {
@@ -349,7 +364,7 @@
   padding: 18px 22px;
   background: #181818;
   border-radius: 8px;
-  border-left: 4px solid #1DB954;
+  border-left: 4px solid #1ed760;
   font-size: 1rem;
   line-height: 1.5;
   transition: all 0.3s ease;
@@ -363,8 +378,88 @@
 }
 
 .summary-content strong {
-  color: #1DB954;
+  color: #1ed760;
   font-weight: 700;
+}
+
+.country-popularity {
+  text-align: center;
+  margin: 0 0 30px 0;
+  padding: 20px;
+  background: #1ed760;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+}
+
+.country-popularity-label {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+}
+
+.country-popularity-value {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.song-link {
+  color: #FFFFFF;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  cursor: pointer;
+}
+
+.song-link:hover {
+  color: #1ed760;
+  text-decoration: underline;
+}
+
+.song-link:visited {
+  color: #FFFFFF;
+}
+
+.clickable-card {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.clickable-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 15px 35px rgba(29, 185, 84, 0.3);
+  border-color: #1ed760;
+  background: #1f1f1f;
+}
+
+.clickable-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(29, 185, 84, 0.1) 0%, rgba(29, 185, 84, 0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  border-radius: 8px;
+}
+
+.clickable-card:hover::after {
+  opacity: 1;
+}
+
+.section-description {
+  margin: 20px 0 5px 0;
+  padding: 0 20px;
+}
+
+.section-description p {
+  color: #e5e5e5;
+  font-size: 16px;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .data-source {
@@ -397,26 +492,9 @@
   .country-selector {
     margin: 20px 20px 40px 20px;
   }
-  
-  .dashboard-header {
-    padding: 40px 20px;
-  }
 }
 
 @media (max-width: 768px) {
-  .artist-section {
-    padding: 30px 20px;
-    margin: 25px 15px;
-  }
-  .artist-card {
-    width: clamp(260px, 80%, 400px);
-  }
-  
-  .dashboard-header {
-    padding: 30px 15px;
-    text-align: center;
-  }
-  
   .dashboard-title {
     font-size: 2.2rem;
   }
@@ -490,104 +568,4 @@
     margin: 20px 10px 40px 10px;
     padding: 15px 10px;
   }
-  
-  .dashboard-header {
-    padding: 25px 10px;
-  }
-}
-
-.country-popularity {
-  text-align: center;
-  margin: 0 0 30px 0;
-  padding: 20px;
-  background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
-}
-
-.country-popularity-label {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: white;
-}
-
-.country-popularity-value {
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.artist-info p.popularity-score {
-  font-weight: 600;
-  color: #1DB954;
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
-  margin-top: 4px;
-}
-
-.artist-info p {
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
-}
-
-.song-link {
-  color: #FFFFFF;
-  text-decoration: none;
-  transition: color 0.3s ease;
-  cursor: pointer;
-}
-
-.song-link:hover {
-  color: #1DB954;
-  text-decoration: underline;
-}
-
-.song-link:visited {
-  color: #FFFFFF;
-}
-
-.clickable-card {
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.clickable-card:hover {
-  transform: translateY(-8px) scale(1.03);
-  box-shadow: 0 15px 35px rgba(29, 185, 84, 0.3);
-  border-color: #1DB954;
-  background: #1f1f1f;
-}
-
-.clickable-card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(29, 185, 84, 0.1) 0%, rgba(29, 185, 84, 0) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-  border-radius: 8px;
-}
-
-.clickable-card:hover::after {
-  opacity: 1;
-}
-
-.section-description {
-  margin: 20px 0 5px 0;
-  padding: 0 20px;
-}
-
-.section-description p {
-  color: #e5e5e5;
-  font-size: 16px;
-  line-height: 1.5;
-  text-align: center;
-  font-style: italic;
 }

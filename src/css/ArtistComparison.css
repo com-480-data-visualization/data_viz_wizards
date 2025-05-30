@@ -4,22 +4,12 @@
   width: 100%;
   max-width: none;
   margin: 0;
-  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   background: #000000;
   min-height: 100vh;
   padding-bottom: 40px;
 }
 
-.dashboard-header {
-  background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
-  color: white;
-  padding: 40px 30px;
-  border-radius: 0;
-  margin-bottom: 20px;
-  position: relative;
-  box-shadow: 0 10px 30px rgba(29, 185, 84, 0.3);
-  overflow: hidden;
-}
 
 .dashboard-header::before {
   content: '';
@@ -32,40 +22,7 @@
   pointer-events: none;
 }
 
-.dashboard-title {
-  margin: 0;
-  font-size: 2.8rem;
-  font-weight: 900;
-  letter-spacing: -1px;
-  position: relative;
-  z-index: 1;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
 
-.dashboard-subtitle {
-  font-weight: 400;
-  margin: 12px 0 0 0;
-  font-size: 1.3rem;
-  opacity: 0.9;
-  position: relative;
-  z-index: 1;
-}
-
-.dashboard-note {
-  background: #1DB954;
-  color: white;
-  padding: 16px 28px;
-  border-radius: 25px;
-  position: absolute;
-  right: 50px;
-  top: 40px;
-  box-shadow: 0 6px 20px rgba(29, 185, 84, 0.3);
-  font-weight: 700;
-  font-size: 0.9rem;
-  position: relative;
-  z-index: 1;
-  backdrop-filter: blur(10px);
-}
 
 .loading, .error {
   display: flex;
@@ -100,7 +57,7 @@
   font-size: 1.8rem;
   font-weight: 900;
   color: #FFFFFF;
-  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .selector-subtitle {
@@ -108,7 +65,7 @@
   color: #B3B3B3;
   font-size: 1.1rem;
   font-weight: 400;
-  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .selector-card {
@@ -123,7 +80,7 @@
 .selector-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
-  border-color: #1DB954;
+  border-color: #1ed760;
 }
 
 .comparison-section {
@@ -139,7 +96,7 @@
 }
 
 .card-header {
-  background: #1DB954;
+  background: #1ed760;
   color: white;
   padding: 20px 25px;
   display: flex;
@@ -193,14 +150,14 @@
 
 /* Radar Chart Label Styling */
 .recharts-polar-angle-axis text {
-  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   cursor: pointer !important;
   fill: #FFFFFF !important; /* White by default */
 }
 
 .recharts-polar-angle-axis g:hover text {
-  fill: #1DB954 !important; /* Green on hover */
+  fill: #1ed760 !important; /* Green on hover */
 }
 
 /* Enhanced radar chart container for better hover experience */
@@ -214,7 +171,7 @@
 
 .recharts-polar-radius-axis text {
   fill: #B3B3B3 !important;
-  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
   font-size: 10px !important;
 }
 
@@ -229,7 +186,6 @@
   padding: 10px 20px 25px;
   font-size: 1rem;
   color: #B3B3B3;
-  font-style: italic;
   font-weight: 500;
   background: #121212;
   text-align: center;
@@ -280,7 +236,6 @@
   height: 100%;
   text-align: center;
   color: #B3B3B3;
-  font-style: italic;
   line-height: 1.5;
 }
 
@@ -312,7 +267,7 @@
   color: #FFFFFF;
   font-size: 16px;
   text-transform: capitalize;
-  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .tooltip-description {
@@ -320,8 +275,7 @@
   color: #B3B3B3;
   font-size: 13px;
   line-height: 1.4;
-  font-style: italic;
-  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .tooltip-values {
@@ -334,7 +288,7 @@
   padding: 12px 15px;
   background-color: #282828;
   border-radius: 6px;
-  border-left: 3px solid #1DB954;
+  border-left: 3px solid #1ed760;
   transition: all 0.3s ease;
 }
 
@@ -348,7 +302,7 @@
   font-size: 14px;
   font-weight: 600;
   color: #FFFFFF;
-  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .tooltip-level-description {
@@ -357,7 +311,6 @@
   font-weight: 400;
   margin-top: 5px;
   line-height: 1.4;
-  font-style: italic;
   padding-left: 10px;
   border-left: 2px solid #333;
 }
@@ -385,8 +338,8 @@
 
 .top-description {
   order: 1;
-  background: rgba(29, 185, 84, 0.15);
-  border: 1px solid rgba(29, 185, 84, 0.3);
+  background: rgba(30, 215, 96, 0.15);
+  border: 1px solid rgba(30, 215, 96, 0.3);
 }
 
 .bottom-description {
@@ -538,7 +491,7 @@
 .artist-percentage {
   font-size: 0.65rem;
   font-weight: 500;
-  color: #1DB954;
+  color: #1ed760;
   text-align: center;
 }
 
@@ -608,7 +561,7 @@
   font-size: 1.8rem;
   font-weight: 700;
   color: #FFFFFF;
-  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .empty-state-content p {
@@ -616,7 +569,7 @@
   color: #B3B3B3;
   font-size: 1.1rem;
   line-height: 1.5;
-  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 /* Responsive Design */
