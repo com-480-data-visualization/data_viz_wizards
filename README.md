@@ -86,6 +86,7 @@ For Milestone 3 we provide three deliverables:
 - Website: It is hosted with GitHub Webpages and can be found here: https://com-480-data-visualization.github.io/data_viz_wizards/
 - Process Book: It can be found in the `process_book.pdf` file on the root level of the repository.
 - Screencast: A short demo video showing the key components of our application. It can be found [here](https://drive.google.com/file/d/1vnYlW212Dr2hJbwQBysJeNsPWagdf-62/view?usp=share_link). 
+- The data is hosted on dropboxed and accessed automatically from there. It can be manually downloaded with this [link](https://dl.dropboxusercontent.com/scl/fi/g5ldnl5g5fai6o5twc587/cleaned_data.csv?rlkey=nlhzlwfwymp7ma7497xw8kqdh&st=xr4zrmns&dl=0).
 
 # Spotify Data Visualization
 
