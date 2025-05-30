@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useRef } from 'react'
 import * as d3 from 'd3'
 
 const MusicDataContext = createContext()
@@ -58,8 +58,6 @@ const calculateArtistStats = (artistStatsData, artist) => {
   };
 
 
-  console.log("popu_max_list", artistData.popu_max_list)
-  
   return {
     attributes: {
       danceability: parseFloat(artistData.danceability) || 0,
@@ -189,9 +187,16 @@ export const MusicDataProvider = ({ children }) => {
   const [genres, setGenres] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const hasLoadedData = useRef(false)
 
   useEffect(() => {
     const loadData = async () => {
+      // Prevent double loading in StrictMode
+      if (hasLoadedData.current) {
+        return
+      }
+      hasLoadedData.current = true
+
       try {
         console.log('Loading music and artist stats data...')
         const [musicDataResponse, artistStatsResponse] = await Promise.all([

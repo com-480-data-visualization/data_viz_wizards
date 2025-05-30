@@ -626,7 +626,10 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
   return (
     <div className="rank-jitter-plot">
       <div className="card-header">
-        <h3 className="card-title">Artist Song Rankings Distribution</h3>
+        <div className="card-header-content">
+          <h3 className="card-title">Artist Song Rankings Distribution</h3>
+          <p className="card-description">Each dot is a track—see how many songs cracked the Top 10, Top 50 or Top 200 on the global singles chart</p>
+        </div>
         <div className="card-icon">
           <svg viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
@@ -742,10 +745,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
             )}
           </AnimatePresence>
         </div>
-      </div>
-      
-      <div className="card-footer">
-        Each point corresponds to a track of the selected artist. Hover over to see the name of the track and best rank it has scored in the global singles chart.
       </div>
     </div>
   )
