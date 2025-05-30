@@ -9,7 +9,7 @@
 
 [Milestone 1](#milestone-1) • [Milestone 2](#milestone-2) • [Milestone 3](#milestone-3)
 
-## Milestone 1 (21st March, 5pm)
+## Milestone 1
 
 ### Dataset
 
@@ -72,7 +72,7 @@ This dataset has previously been explored by several users on the Kaggle platfor
 
 We aim to present various music attributes in an entertaining yet insightful manner, significantly enhancing user engagement and data comprehension. We draw inspiration from several visualizations outside the music domain. For instance, the interactive world map provided by Google Trends demonstrates an effective way of presenting geographically linked information. We plan to adopt this method to visualize music interests across different regions. The visualization from Our World in Data, showcases stacked histograms which we plan to adapt to demonstrate evolving trends in music attributes over time.
 
-## Milestone 2 (18th April, 5pm)
+## Milestone 2
 
 Deliverables for Milestone 2 are in the `Milestone_2.pdf` on the root level of the repository.
 
@@ -80,19 +80,16 @@ Deliverables for Milestone 2 are in the `Milestone_2.pdf` on the root level of t
 Skeleton Website: https://com-480-data-visualization.github.io/data_viz_wizards/
 
 
-## Milestone 3 (30th May, 5pm)
+## Milestone 3
 
-**80% of the final grade**
-
-
-## Late policy
-
-- < 24h: 80% of the grade for the milestone
-- < 48h: 70% of the grade for the milestone
+For Milestone 3 we provide three deliverables:
+- Website: It is hosted with GitHub Webpages and can be found here: https://com-480-data-visualization.github.io/data_viz_wizards/
+- Process Book: It can be found in the `process_book.pdf` file on the root level of the directory.
+- Video: A short demo video showing the key components of our application.
 
 # Spotify Data Visualization
 
-This project visualizes Spotify music data across different countries, showing popularity of genres, artists, and songs worldwide.
+This project visualizes Spotify music data across different countries, showing popularity of genres, artists, and songs worldwide. We use React, to run the application locally follow the steps below. To visit the hosted website just follow the link above.
 
 ## Prerequisites
 
@@ -129,27 +126,6 @@ npm run dev
 ```
 http://localhost:5173
 ```
-
-## Project Structure
-
-- `src/components/` - React components
-  - `MapPlot.jsx` - World map visualization
-  - `CountryStatistics.jsx` - Country-specific statistics
-  - `ArtistComparison.jsx` - Artist comparison visualization
-  - `Navigation.jsx` - Navigation between views
-- `src/App.jsx` - Main application component
-- `src/main.jsx` - Application entry point
-- `src/index.html` - HTML template
-- `src/App.css` - Main styles
-- `src/index.css` - Global styles
-
-## Features
-
-- Interactive world map showing music popularity
-- Country-specific statistics
-- Artist comparison tool
-- Filter by genre, artist, or song
-- Responsive design
 
 ## Data Sources
 
