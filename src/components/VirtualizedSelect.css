@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Circular+Std:wght@300;400;500;600;700;900&display=swap');
+
+.virtualized-select-container {
+  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Custom scrollbar for the virtualized list */
+.virtualized-select-container .react-select__menu-list {
+  scrollbar-width: thin;
+  scrollbar-color: #1DB954 #282828;
+}
+
+.virtualized-select-container .react-select__menu-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.virtualized-select-container .react-select__menu-list::-webkit-scrollbar-track {
+  background: #282828;
+  border-radius: 3px;
+}
+
+.virtualized-select-container .react-select__menu-list::-webkit-scrollbar-thumb {
+  background: #1DB954;
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.virtualized-select-container .react-select__menu-list::-webkit-scrollbar-thumb:hover {
+  background: #16A64A;
+}
+
+/* Enhanced focus styles */
+.virtualized-select-container .react-select__control--is-focused {
+  border-color: #1DB954 !important;
+  box-shadow: 0 0 0 2px rgba(29, 185, 84, 0.2) !important;
+}
+
+/* Loading animation */
+.virtualized-select-container .react-select__loading-indicator {
+  color: #1DB954;
+}
+
+/* Multi-value animations */
+.virtualized-select-container .react-select__multi-value {
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Menu animations */
+.virtualized-select-container .react-select__menu {
+  animation: menuFadeIn 0.15s ease-out;
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Option hover effects */
+.virtualized-select-container .react-select__option:hover {
+  background-color: #333333 !important;
+  transition: background-color 0.2s ease;
+}
+
+.virtualized-select-container .react-select__option--is-selected {
+  background-color: #1DB954 !important;
+}
+
+.virtualized-select-container .react-select__option--is-selected:hover {
+  background-color: #16A64A !important;
+}
+
+/* Disabled state */
+.virtualized-select-container .react-select__control--is-disabled {
+  background-color: #1a1a1a !important;
+  border-color: #333333 !important;
+  opacity: 0.6;
+}
+
+.virtualized-select-container .react-select__single-value--is-disabled,
+.virtualized-select-container .react-select__placeholder--is-disabled {
+  color: #666666 !important;
+}
+
+/* Clear indicator hover effect */
+.virtualized-select-container .react-select__clear-indicator:hover {
+  color: #ff6b6b !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .virtualized-select-container .react-select__control {
+    min-height: 44px !important;
+    font-size: 14px !important;
+  }
+  
+  .virtualized-select-container .react-select__multi-value {
+    font-size: 12px;
+  }
+  
+  .virtualized-select-container .react-select__option {
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .virtualized-select-container .react-select__control {
+    min-height: 42px !important;
+    font-size: 13px !important;
+  }
+  
+  .virtualized-select-container .react-select__option {
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+  }
+} 
