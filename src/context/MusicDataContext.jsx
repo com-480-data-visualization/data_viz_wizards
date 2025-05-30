@@ -85,6 +85,34 @@ const calculateArtistStats = (artistStatsData, artist) => {
   }
 }
 
+const calculateGlobalThresholds = (data) => {
+  const calculatePercentiles = (values, p33, p67) => {
+    const sorted = values.filter(v => !isNaN(v)).sort((a, b) => a - b)
+    const len = sorted.length
+    return {
+      p33: sorted[Math.floor(len * p33)],
+      p67: sorted[Math.floor(len * p67)]
+    }
+  }
+
+  // Extract values for each feature
+  const tempoValues = data.map(song => parseFloat(song.tempo)).filter(v => !isNaN(v))
+  const energyValues = data.map(song => parseFloat(song.energy)).filter(v => !isNaN(v))
+  const danceabilityValues = data.map(song => parseFloat(song.danceability)).filter(v => !isNaN(v))
+  const valenceValues = data.map(song => parseFloat(song.valence)).filter(v => !isNaN(v))
+  const acousticsValues = data.map(song => parseFloat(song.acoustics)).filter(v => !isNaN(v))
+  const livelinessValues = data.map(song => parseFloat(song.liveliness)).filter(v => !isNaN(v))
+
+  return {
+    tempo: calculatePercentiles(tempoValues, 0.33, 0.67),
+    energy: calculatePercentiles(energyValues, 0.33, 0.67),
+    danceability: calculatePercentiles(danceabilityValues, 0.33, 0.67),
+    valence: calculatePercentiles(valenceValues, 0.33, 0.67),
+    acoustics: calculatePercentiles(acousticsValues, 0.33, 0.67),
+    liveliness: calculatePercentiles(livelinessValues, 0.33, 0.67)
+  }
+}
+
 const processData = (musicData) => {
   console.log('Processing music data...')
   const newDataByCountry = {}
@@ -154,7 +182,6 @@ const processData = (musicData) => {
     artists: Array.from(artists),
     songs: Array.from(songs),
     genresNew: Array.from(genresNew),
-    songs: Array.from(songs)
   }
 }
 
@@ -163,6 +190,8 @@ export const MusicDataProvider = ({ children }) => {
   const [processedData, setProcessedData] = useState(null)
   const [artists, setArtists] = useState([])
   const [artistStatsData, setArtistStatsData] = useState(null)
+  const [globalThresholds, setGlobalThresholds] = useState(null)
+  const [genres, setGenres] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -189,14 +218,23 @@ export const MusicDataProvider = ({ children }) => {
 
         setMusicData(musicDataResponse)
         setArtistStatsData(artistStatsResponse)
+        
         const processed = processData(musicDataResponse)
         setProcessedData(processed)
+        
+        // Calculate global thresholds once
+        const thresholds = calculateGlobalThresholds(musicDataResponse)
+        setGlobalThresholds(thresholds)
         
         // Get artists from the precomputed stats data and sort them alphabetically
         const artistList = artistStatsResponse
           .map(data => data.Artist)
           .sort((a, b) => a.localeCompare(b));
         setArtists(artistList)
+        
+        // Add genres processing here
+        setGenres(processed.genres)
+        
       } catch (err) {
         console.error('Error loading data:', err)
         setError(err)
@@ -212,6 +250,9 @@ export const MusicDataProvider = ({ children }) => {
     musicData,
     processedData,
     artists,
+    artistStatsData,
+    globalThresholds,
+    genres,
     calculateArtistStats: (artist) => calculateArtistStats(artistStatsData, artist),
     loading,
     error
