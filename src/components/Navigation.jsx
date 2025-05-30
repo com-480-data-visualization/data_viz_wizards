@@ -1,4 +1,4 @@
-import './Navigation.css'
+import '../css/Navigation.css'
 
 const Navigation = ({ currentView, setCurrentView }) => {
   return (
@@ -7,7 +7,7 @@ const Navigation = ({ currentView, setCurrentView }) => {
         className={currentView === 'map' ? 'active' : ''}
         onClick={() => setCurrentView('map')}
       >
-        World Map
+        Globe
       </button>
       <button
         className={currentView === 'country-stats' ? 'active' : ''}
