@@ -16,16 +16,16 @@ const Navigation = ({ currentView, setCurrentView }) => {
         Country Statistics
       </button>
       <button
-        className={currentView === 'property-search' ? 'active' : ''}
-        onClick={() => setCurrentView('property-search')}
-      >
-        Music Discovery
-      </button>
-      <button
         className={currentView === 'artist-comparison' ? 'active' : ''}
         onClick={() => setCurrentView('artist-comparison')}
       >
         Artist Comparison
+      </button>
+      <button
+        className={currentView === 'property-search' ? 'active' : ''}
+        onClick={() => setCurrentView('property-search')}
+      >
+        Music Discovery
       </button>
       <button
         className={currentView === 'dataset-overview' ? 'active' : ''}
