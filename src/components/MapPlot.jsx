@@ -3,6 +3,8 @@ import { useMusicData } from '../context/MusicDataContext'
 import Globe from 'react-globe.gl'
 import { interpolateViridis } from 'd3-scale-chromatic'
 import Select from 'react-select'
+import LoadingSpinner from './LoadingSpinner'
+import { motion } from 'framer-motion'
 
 const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
   const { processedData, loading, error } = useMusicData();
@@ -13,7 +15,11 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
   //const [countryData, setCountryData] = useState([]);
   const [basePolygons, setBasePolygons] = useState([]);
   const [coloredPolygons, setColoredPolygons] = useState([]);
-  const [showOverlay, setShowOverlay] = useState(true);
+  const [showOverlay, setShowOverlay] = useState(() => {
+    // Check if user has already seen the overlay
+    const hasSeenOverlay = localStorage.getItem('hasSeenMapOverlay');
+    return hasSeenOverlay !== 'true';
+  });
   const globeRef = useRef();
 
   const countryNameMapping = {
@@ -191,7 +197,7 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
     })
   }
 
-  if (loading) return <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>Loading Data...</div>
+  if (loading) return <LoadingSpinner message="Loading Data..." />
   if (error) return <div>Error loading data: {error.message}</div>
 
   return (
@@ -252,7 +258,10 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
             To compare your favorite artists, click on the "Artist Comparison" button in the navigation bar.
           </div>
           <button
-            onClick={() => setShowOverlay(false)}
+            onClick={() => {
+              setShowOverlay(false);
+              localStorage.setItem('hasSeenMapOverlay', 'true');
+            }}
             style={{
               padding: '10px 20px',
               fontSize: '1rem',

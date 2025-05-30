@@ -3,6 +3,9 @@ import { useMusicData } from '../context/MusicDataContext'
 import DualRangeSlider from './DualRangeSlider'
 import SearchableSelect from './SearchableSelect'
 import '../css/CountryStatistics.css'
+
+import LoadingSpinner from './LoadingSpinner'
+
 import '../css/PropertySearch.css'
 
 const PropertySearch = () => {
@@ -191,7 +194,7 @@ const PropertySearch = () => {
     }
   }
 
-  if (loading) return <div>Loading...</div>
+  if (loading) return <LoadingSpinner />
   if (error) return <div>Error loading data: {error.message}</div>
 
   return (
