@@ -718,6 +718,11 @@
   border: 1px solid #282828;
 }
 
+/* RankJitterPlot spacing */
+.rank-jitter-plot {
+  margin-top: 30px;
+}
+
 .histogram-card .recharts-surface {
   background: linear-gradient(to bottom, #1a1a1a 0%, #2a2a2a 100%);
   border: 2px solid #333333;
