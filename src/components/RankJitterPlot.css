@@ -6,7 +6,6 @@
   border: 1px solid #282828;
   font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   width: 100%;
-  max-width: 900px;
 }
 
 .card-header {
@@ -116,6 +115,7 @@
 .chart-container {
   position: relative;
   overflow: visible;
+  width: 100%;
 }
 
 .card-footer {

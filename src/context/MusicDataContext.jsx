@@ -46,26 +46,19 @@ const calculateArtistStats = (artistStatsData, artist) => {
   const artistData = artistStatsData.find(data => data.Artist === artist);
   if (!artistData) return null;
   
-  // Parse the popu_max_list string to an actual array
-  let popuMaxList = [];
-  if (artistData.popu_max_list) {
+  // Helper function to safely parse JSON strings
+  const parseJsonField = (field, fieldName) => {
+    if (!field) return [];
     try {
-      // Remove any surrounding whitespace and parse as JSON
-      const cleanString = artistData.popu_max_list.trim();
-      if (cleanString.startsWith('[') && cleanString.endsWith(']')) {
-        popuMaxList = JSON.parse(cleanString);
-      } else {
-        // If it's just a single number without brackets, wrap it in an array
-        const num = parseInt(cleanString);
-        if (!isNaN(num)) {
-          popuMaxList = [num];
-        }
-      }
+      return JSON.parse(field);
     } catch (error) {
-      console.error('Error parsing popu_max_list for artist', artist, ':', artistData.popu_max_list, error);
-      popuMaxList = [];
+      console.error(`Error parsing ${fieldName} for artist`, artist, ':', field, error);
+      return [];
     }
-  }
+  };
+
+
+  console.log("popu_max_list", artistData.popu_max_list)
   
   return {
     attributes: {
@@ -81,7 +74,9 @@ const calculateArtistStats = (artistStatsData, artist) => {
     trackCount: parseInt(artistData.track_count) || 0,
     top50Count: parseInt(artistData.top50_count) || 0,
     top10Count: parseInt(artistData.top10_count) || 0,
-    popuMaxList: popuMaxList,
+    popuMaxList: parseJsonField(artistData.popu_max_list, 'popu_max_list'),
+    title: parseJsonField(artistData.title, 'title'),
+    uri: parseJsonField(artistData.uri, 'uri')
   }
 }
 
@@ -201,7 +196,7 @@ export const MusicDataProvider = ({ children }) => {
         console.log('Loading music and artist stats data...')
         const [musicDataResponse, artistStatsResponse] = await Promise.all([
           d3.csv("https://dl.dropboxusercontent.com/scl/fi/g5ldnl5g5fai6o5twc587/cleaned_data.csv?rlkey=nlhzlwfwymp7ma7497xw8kqdh&st=xr4zrmns&dl=0"),
-          d3.csv("https://dl.dropboxusercontent.com/scl/fi/hu15n5a40o698hx8dg7mq/artist_attributes_info_joined.csv?rlkey=5cpmwhrc5e5y05rncvnjnessh&st=lshqavpo&dl=0")
+          d3.csv("https://dl.dropboxusercontent.com/scl/fi/vyj0f7mq9xodz5yn5naep/artist_attributes_info_joined2.csv?rlkey=540an69xs9i30x59ho95gbgw4&st=f9ces8ay&dl=0")
         ]);
 
         console.log('Music data loaded successfully:', {
