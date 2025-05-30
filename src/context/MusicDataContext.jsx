@@ -73,7 +73,6 @@ const calculateArtistStats = (artistStatsData, artist) => {
       energy: parseFloat(artistData.energy) || 0,
       speechiness: parseFloat(artistData.speechiness) || 0,
       acoustics: parseFloat(artistData.acoustics) || 0,
-      instrumentalness: parseFloat(artistData.instrumentalness) || 0,
       liveliness: parseFloat(artistData.liveliness) || 0,
       valence: parseFloat(artistData.valence) || 0,
       tempo: parseFloat(artistData.tempo) || 0

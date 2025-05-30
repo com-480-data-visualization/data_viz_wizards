@@ -48,14 +48,6 @@ const ArtistComparison = () => {
         high: "Predominantly acoustic (guitar, piano, etc.)."
       }
     },
-    instrumentalness: {
-      tooltip: "Likelihood a track has no vocals (treats \"ooh/aah\" as instrumental).",
-      levels: {
-        low: "Vocals clearly present.",
-        medium: "Some instrumental passages, but still singers.",
-        high: "Fully instrumental, no vocals at all."
-      }
-    },
     liveliness: {
       tooltip: "Probability an audience is present (live vs. studio recording).",
       levels: {
@@ -87,7 +79,6 @@ const ArtistComparison = () => {
     energy: '⚡️',
     speechiness: '🗣️',
     acoustics: '🎸',
-    instrumentalness: '🎹',
     liveliness: '🎤',
     valence: '😊'
   }
@@ -172,7 +163,7 @@ const ArtistComparison = () => {
                         if (selectedArtists.length === 0) return [];
                         
                         const attributes = ['danceability', 'energy', 'speechiness', 'acoustics', 
-                                         'instrumentalness', 'liveliness', 'valence'];
+                                         'liveliness', 'valence'];
                         
                         return attributes.map(attr => {
                           const dataPoint = { attribute: attr };
