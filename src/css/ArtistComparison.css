@@ -38,7 +38,8 @@
   color: #ff6b6b;
 }
 
-.artist-selector-section {
+/* Shared selector section styles */
+.selector-section {
   margin: 20px 30px 40px 30px;
   background: #121212;
   border-radius: 8px;
@@ -47,12 +48,12 @@
   border: 1px solid #282828;
 }
 
-.selector-header {
+.selector-section .selector-header {
   text-align: center;
   margin-bottom: 25px;
 }
 
-.selector-title {
+.selector-section .selector-title {
   margin: 0 0 8px 0;
   font-size: 1.8rem;
   font-weight: 900;
@@ -60,12 +61,22 @@
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-.selector-subtitle {
+.selector-section .selector-subtitle {
   margin: 0;
   color: #B3B3B3;
   font-size: 1.1rem;
   font-weight: 400;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Legacy class for backward compatibility */
+.artist-selector-section {
+  margin: 20px 30px 40px 30px;
+  background: #121212;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid #282828;
 }
 
 .selector-card {
@@ -595,7 +606,7 @@
     padding: 40px 20px;
   }
   
-  .artist-selector-section,
+  .selector-section,
   .comparison-section {
     margin: 20px 20px 40px 20px;
   }
@@ -640,7 +651,7 @@
     display: inline-block;
   }
   
-  .artist-selector-section,
+  .selector-section,
   .comparison-section {
     margin: 20px 15px 40px 15px;
   }
@@ -664,7 +675,7 @@
     padding: 25px 10px;
   }
   
-  .artist-selector-section,
+  .selector-section,
   .comparison-section {
     margin: 20px 10px 40px 10px;
   }

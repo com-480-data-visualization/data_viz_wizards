@@ -4,6 +4,7 @@ import DualRangeSlider from './DualRangeSlider'
 import SearchableSelect from './SearchableSelect'
 import '../css/CountryStatistics.css'
 
+import VirtualizedSelect from './VirtualizedSelect'
 import LoadingSpinner from './LoadingSpinner'
 
 import '../css/PropertySearch.css'
@@ -50,17 +51,17 @@ const PropertySearch = () => {
     }
   }, [musicData])
 
-  const handleGenresChange = (updateFunction) => {
+  const handleGenresChange = (selectedGenres) => {
     setFilters(prev => ({
       ...prev,
-      genres: updateFunction(prev.genres)
+      genres: selectedGenres || []
     }))
   }
 
-  const handleArtistsChange = (updateFunction) => {
+  const handleArtistsChange = (selectedArtists) => {
     setFilters(prev => ({
       ...prev,
-      artists: updateFunction(prev.artists)
+      artists: selectedArtists || []
     }))
   }
 
@@ -238,22 +239,28 @@ const PropertySearch = () => {
           <div className="multi-select-inputs">
             <div className="multi-select-group">
               <label>Genres:</label>
-              <SearchableSelect
+              <VirtualizedSelect
                 options={genres}
-                selectedValues={filters.genres}
+                value={filters.genres}
                 onChange={handleGenresChange}
                 placeholder="Search and select genres..."
-                multiple={true}
+                isMulti={true}
+                isSearchable={true}
+                closeMenuOnSelect={false}
+                hideSelectedOptions={false}
               />
             </div>
             <div className="multi-select-group">
               <label>Artists:</label>
-              <SearchableSelect
+              <VirtualizedSelect
                 options={artists}
-                selectedValues={filters.artists}
+                value={filters.artists}
                 onChange={handleArtistsChange}
                 placeholder="Search and select artists..."
-                multiple={true}
+                isMulti={true}
+                isSearchable={true}
+                closeMenuOnSelect={false}
+                hideSelectedOptions={false}
               />
             </div>
           </div>

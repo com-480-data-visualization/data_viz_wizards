@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { useMusicData } from '../context/MusicDataContext'
+import VirtualizedSelect from './VirtualizedSelect'
 import LoadingSpinner from './LoadingSpinner'
 import '../css/CountryStatistics.css'
 
@@ -514,6 +515,10 @@ const CountryStatistics = ({ selectedCountry: propSelectedCountry }) => {
     })
   }
 
+  const handleCountryChange = (value) => {
+    setSelectedCountry(value)
+  }
+
   if (loading) return <LoadingSpinner />
   if (error) return <div>Error loading data: {error.message}</div>
 
@@ -526,18 +531,20 @@ const CountryStatistics = ({ selectedCountry: propSelectedCountry }) => {
         </div>
       </div>
       
-      <div className="country-selector">
-        <label htmlFor="country-select">Select Country: </label>
-        <select
+      <div className="selector-section">
+        <div className="selector-header">
+          <h3 className="selector-title">Select Country to Explore</h3>
+          <p className="selector-subtitle">Choose a country to discover its musical DNA and popular tracks</p>
+        </div>
+        <VirtualizedSelect
           id="country-select"
           value={selectedCountry || ''}
-          onChange={(e) => setSelectedCountry(e.target.value)}
-        >
-          {!selectedCountry && <option value="">Choose a country...</option>}
-          {validCountries.map(country => (
-            <option key={country} value={country}>{country}</option>
-          ))}
-        </select>
+          onChange={handleCountryChange}
+          options={validCountries}
+          placeholder="Choose a country..."
+          isSearchable={true}
+          className="country-select"
+        />
       </div>
       
       {!selectedCountry ? (

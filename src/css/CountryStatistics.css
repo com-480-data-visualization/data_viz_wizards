@@ -489,7 +489,7 @@
     margin: 30px 20px;
   }
   
-  .country-selector {
+  .selector-section {
     margin: 20px 20px 40px 20px;
   }
 }
@@ -517,17 +517,9 @@
     padding: 25px;
   }
   
-  .country-selector {
+  .selector-section {
     margin: 20px 15px 40px 15px;
-    padding: 20px 15px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  
-  .country-selector select {
-    width: 100%;
-    min-width: auto;
+    padding: 25px;
   }
   
   .artist-list {
@@ -564,8 +556,39 @@
     padding: 20px;
   }
   
-  .country-selector {
+  .selector-section {
     margin: 20px 10px 40px 10px;
-    padding: 15px 10px;
+    padding: 20px;
   }
+}
+
+/* Shared selector section styles */
+.selector-section {
+  margin: 20px 30px 40px 30px;
+  background: #121212;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid #282828;
+}
+
+.selector-section .selector-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.selector-section .selector-title {
+  margin: 0 0 8px 0;
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #FFFFFF;
+  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.selector-section .selector-subtitle {
+  margin: 0;
+  color: #B3B3B3;
+  font-size: 1.1rem;
+  font-weight: 400;
+  font-family: 'Circular Std', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
