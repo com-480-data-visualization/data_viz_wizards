@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useMusicData } from '../context/MusicDataContext'
 import DualRangeSlider from './DualRangeSlider'
-import SearchableSelect from './SearchableSelect'
 import '../css/CountryStatistics.css'
 
 import VirtualizedSelect from './VirtualizedSelect'
