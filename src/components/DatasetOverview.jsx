@@ -10,12 +10,13 @@ import {
   Tooltip,
   CartesianGrid
 } from 'recharts'
+import LoadingSpinner from './LoadingSpinner'
 import '../css/CountryStatistics.css'
 
 export default function DatasetOverview() {
   const { processedData, loading, error } = useMusicData()
 
-  if (loading || !processedData) return <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>Loading Data...</div>
+  if (loading || !processedData) return <LoadingSpinner />
   if (error) return <div>Error loading data: {error.message}</div>
 
   const { dataByCountry, genres, artists, songs, genresNew } = processedData

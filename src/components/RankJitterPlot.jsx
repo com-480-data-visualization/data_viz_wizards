@@ -23,11 +23,6 @@ const RankJitterPlot = ({ selectedArtists, artistStats }) => {
   const width = Math.max(containerWidth - margin.left - margin.right, 400) // Ensure minimum width
   const height = 400 - margin.top - margin.bottom
   
-  // Debug: Log width changes
-  useEffect(() => {
-    console.log('Container width changed:', containerWidth, 'Chart width:', width)
-  }, [containerWidth, width])
-  
   // Effect to handle container resize
   useEffect(() => {
     const handleResize = () => {

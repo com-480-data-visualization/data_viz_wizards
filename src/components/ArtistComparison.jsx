@@ -4,6 +4,7 @@ import { useMusicData } from '../context/MusicDataContext'
 import SearchableSelect from './SearchableSelect'
 import RankJitterPlot from './RankJitterPlot'
 import RadarChart from './RadarChart'
+import LoadingSpinner from './LoadingSpinner'
 import '../css/ArtistComparison.css'
 
 const ArtistComparison = () => {
@@ -30,7 +31,7 @@ const ArtistComparison = () => {
     setSelectedArtists(values)
   }
 
-  if (loading) return <div className="loading">Loading...</div>
+  if (loading) return <LoadingSpinner />
   if (error) return <div className="error">Error loading data: {error.message}</div>
 
   return (

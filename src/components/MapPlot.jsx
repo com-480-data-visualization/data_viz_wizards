@@ -3,6 +3,8 @@ import { useMusicData } from '../context/MusicDataContext'
 import Globe from 'react-globe.gl'
 import { interpolateViridis } from 'd3-scale-chromatic'
 import Select from 'react-select'
+import LoadingSpinner from './LoadingSpinner'
+import { motion } from 'framer-motion'
 
 const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
   const { processedData, loading, error } = useMusicData();
@@ -191,7 +193,7 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
     })
   }
 
-  if (loading) return <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>Loading Data...</div>
+  if (loading) return <LoadingSpinner message="Loading Data..." />
   if (error) return <div>Error loading data: {error.message}</div>
 
   return (
