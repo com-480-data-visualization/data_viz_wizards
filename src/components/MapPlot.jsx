@@ -15,7 +15,11 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
   //const [countryData, setCountryData] = useState([]);
   const [basePolygons, setBasePolygons] = useState([]);
   const [coloredPolygons, setColoredPolygons] = useState([]);
-  const [showOverlay, setShowOverlay] = useState(true);
+  const [showOverlay, setShowOverlay] = useState(() => {
+    // Check if user has already seen the overlay
+    const hasSeenOverlay = localStorage.getItem('hasSeenMapOverlay');
+    return hasSeenOverlay !== 'true';
+  });
   const globeRef = useRef();
 
   const countryNameMapping = {
@@ -254,7 +258,10 @@ const MapPlot = ({ currentView, setCurrentView, setSelectedCountry }) => {
             To compare your favorite artists, click on the "Artist Comparison" button in the navigation bar.
           </div>
           <button
-            onClick={() => setShowOverlay(false)}
+            onClick={() => {
+              setShowOverlay(false);
+              localStorage.setItem('hasSeenMapOverlay', 'true');
+            }}
             style={{
               padding: '10px 20px',
               fontSize: '1rem',
