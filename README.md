@@ -84,8 +84,8 @@ Skeleton Website: https://com-480-data-visualization.github.io/data_viz_wizards/
 
 For Milestone 3 we provide three deliverables:
 - Website: It is hosted with GitHub Webpages and can be found here: https://com-480-data-visualization.github.io/data_viz_wizards/
-- Process Book: It can be found in the `process_book.pdf` file on the root level of the directory.
-- Video: A short demo video showing the key components of our application.
+- Process Book: It can be found in the `process_book.pdf` file on the root level of the repository.
+- Screencast: A short demo video showing the key components of our application. It can be found (here)[https://drive.google.com/file/d/1vnYlW212Dr2hJbwQBysJeNsPWagdf-62/view?usp=share_link]. 
 
 # Spotify Data Visualization
 
@@ -126,9 +126,3 @@ npm run dev
 ```
 http://localhost:5173
 ```
-
-## Data Sources
-
-The application uses data from:
-- Spotify API
-- World Atlas TopoJSON data
