@@ -7,6 +7,7 @@
 | Yassine Turki| 344704|
 | Kirill Zemlianskii | 395871 |
 
+Website Link: https://com-480-data-visualization.github.io/data_viz_wizards/
 [Milestone 1](#milestone-1) • [Milestone 2](#milestone-2) • [Milestone 3](#milestone-3)
 
 ## Milestone 1
